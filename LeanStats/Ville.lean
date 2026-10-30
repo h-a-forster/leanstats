@@ -25,6 +25,8 @@ stopping theorem to the submartingale `-M`, and lets `n → ∞` by continuity f
 * `LeanStats.Supermartingale.mul_measure_exists_le`: Ville's inequality,
   `ε * P(∃ k, M k ≥ ε) ≤ E[M 0]`.
 * `LeanStats.Supermartingale.measure_exists_le_le_div`: the same, divided by `ε ≠ 0`.
+* `LeanStats.Supermartingale.mul_measure_le_iSup`: the supremum form,
+  `ε * P(sup_k M k ≥ ε) ≤ E[M 0]`.
 
 ## References
 
@@ -104,5 +106,24 @@ theorem Supermartingale.measure_exists_le_le_div [IsFiniteMeasure μ]
     μ {ω | ∃ k, (ε : ℝ) ≤ M k ω} ≤ ENNReal.ofReal (μ[M 0]) / ε := by
   rw [ENNReal.le_div_iff_mul_le (Or.inl (by simpa using hε)) (by simp), mul_comm]
   exact Supermartingale.mul_measure_exists_le hM hnonneg ε
+
+/-- **Ville's inequality, supremum form.** For a non-negative supermartingale `M` and `ε ≥ 0`,
+`ε * P(sup_k M k ≥ ε) ≤ E[M 0]`, the supremum taken in `[0, ∞]`. The event is larger than
+`{∃ k, M k ≥ ε}`: it also contains the paths whose supremum `ε` is approached but not attained. -/
+theorem Supermartingale.mul_measure_le_iSup [IsFiniteMeasure μ]
+    (hM : Supermartingale M 𝒢 μ) (hnonneg : 0 ≤ M) (ε : ℝ≥0) :
+    ε * μ {ω | (ε : ℝ≥0∞) ≤ ⨆ k, ENNReal.ofReal (M k ω)} ≤ ENNReal.ofReal (μ[M 0]) := by
+  refine ENNReal.le_of_forall_lt_one_mul_le fun a ha ↦ ?_
+  lift a to ℝ≥0 using ha.ne_top
+  rw [← mul_assoc, ← ENNReal.coe_mul]
+  refine le_trans (mul_le_mul_right (measure_mono fun ω hω ↦ ?_) _)
+    (Supermartingale.mul_measure_exists_le hM hnonneg (a * ε))
+  rcases eq_or_ne ε 0 with rfl | hε
+  · exact ⟨0, by simpa using hnonneg 0 ω⟩
+  have hlt : ((a * ε : ℝ≥0) : ℝ≥0∞) < ⨆ k, ENNReal.ofReal (M k ω) :=
+    lt_of_lt_of_le (ENNReal.coe_lt_coe.2 (mul_lt_of_lt_one_left (pos_iff_ne_zero.2 hε)
+      (ENNReal.coe_lt_one_iff.1 ha))) hω
+  obtain ⟨k, hk⟩ := lt_iSup_iff.1 hlt
+  exact ⟨k, ((ENNReal.lt_ofReal_iff_toReal_lt ENNReal.coe_ne_top).1 hk).le⟩
 
 end LeanStats
