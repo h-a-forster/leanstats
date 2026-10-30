@@ -69,7 +69,8 @@ tag 0.1.0 after the first green run.
 
 Next, in order of value:
 
-1. Run CI once on GitHub (owner's call: metered minutes), then tag 0.1.0.
+1. Run CI once on GitHub (owner's call: metered minutes), then tag 0.1.0 (notes in
+   docs/release-notes-0.1.0.md).
 2. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).
 3. The Clopper–Pearson endpoints as quantiles of mathlib's Beta distribution (`betaPDF`): needs
    `P_θ(X ≥ x) = ∫₀^θ betaPDF x (n - x + 1)`.
