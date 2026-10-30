@@ -35,7 +35,7 @@ with the sorted formulation is `LeanStats.holmRejects_iff_stepDownRejects` in
   hypothesis in a set `I₀`, then some `j ∈ I₀` has `p j ≤ α / #I₀`.
 * `LeanStats.holm_fwer_le`: if the p-values of the true null hypotheses `I₀` are valid, Holm's
   procedure rejects at least one true null with probability at most `α`, whatever the joint
-  dependence between the p-values.
+  dependence between the p-values (strong FWER control).
 * `LeanStats.bonferroni_fwer_le`: the same for Bonferroni, as a corollary.
 
 ## References
@@ -107,13 +107,34 @@ theorem HolmRejects.exists_le_div_card {α : ℝ} (hα : 0 ≤ α) {p : ι → �
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
+omit [Fintype ι] in
+/-- Valid p-values are almost surely positive: with probability one no `p i`, `i ∈ I₀`, is
+`≤ 0`. This handles levels `α < 0`, where both procedures reject only non-positive p-values. -/
+theorem measure_exists_le_zero (μ : Measure Ω) {p : ι → Ω → ℝ} {I₀ : Finset ι}
+    (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) : μ {ω | ∃ i ∈ I₀, p i ω ≤ 0} = 0 := by
+  refine le_antisymm ?_ bot_le
+  calc μ {ω | ∃ i ∈ I₀, p i ω ≤ 0} = μ (⋃ i ∈ I₀, {ω | p i ω ≤ 0}) := by
+        congr 1
+        ext ω
+        simp
+    _ ≤ ∑ i ∈ I₀, μ {ω | p i ω ≤ 0} := measure_biUnion_finset_le _ _
+    _ ≤ ∑ _i ∈ I₀, ENNReal.ofReal 0 :=
+        sum_le_sum fun i hi ↦ hp i hi 0 ⟨le_rfl, zero_le_one⟩
+    _ = 0 := by simp
+
 /-- **Holm (1979).** Let `I₀` be the set of true null hypotheses and suppose each `p i`,
 `i ∈ I₀`, is a valid p-value. Then Holm's step-down procedure at level `α` rejects at least one
-true null hypothesis with probability at most `α`. No assumption is made on the joint law of the
-p-values, and they need not be measurable. -/
+true null hypothesis with probability at most `α`. Since `I₀` is arbitrary, this is strong
+control of the family-wise error rate. No assumption is made on the joint law of the p-values,
+and they need not be measurable. -/
 theorem holm_fwer_le (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι → Ω → ℝ} {I₀ : Finset ι}
-    (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) {α : ℝ} (hα : 0 ≤ α) :
+    (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) (α : ℝ) :
     μ {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i} ≤ ENNReal.ofReal α := by
+  rcases lt_or_ge α 0 with hα | hα
+  · refine (measure_mono (t := {ω | ∃ i ∈ I₀, p i ω ≤ 0}) ?_).trans
+      ((measure_exists_le_zero μ hp).trans_le bot_le)
+    rintro ω ⟨i, hi, h⟩
+    exact ⟨i, hi, h.le_div.trans (div_nonpos_of_nonpos_of_nonneg hα.le (Nat.cast_nonneg _))⟩
   rcases I₀.eq_empty_or_nonempty with rfl | hne
   · simp
   have hpos : (0 : ℝ) < #I₀ := Nat.cast_pos.2 (card_pos.2 hne)
@@ -131,10 +152,15 @@ theorem holm_fwer_le (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι → Ω 
 /-- **Bonferroni.** Under the hypotheses of `holm_fwer_le`, the Bonferroni procedure rejects at
 least one true null hypothesis with probability at most `α`. -/
 theorem bonferroni_fwer_le (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι → Ω → ℝ}
-    {I₀ : Finset ι} (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) {α : ℝ} (hα : 0 ≤ α) :
-    μ {ω | ∃ i ∈ I₀, BonferroniRejects α (fun j ↦ p j ω) i} ≤ ENNReal.ofReal α :=
-  (measure_mono (fun _ ⟨i, hi, h⟩ ↦ ⟨i, hi, h.holmRejects hα⟩ :
+    {I₀ : Finset ι} (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) (α : ℝ) :
+    μ {ω | ∃ i ∈ I₀, BonferroniRejects α (fun j ↦ p j ω) i} ≤ ENNReal.ofReal α := by
+  rcases lt_or_ge α 0 with hα | hα
+  · refine (measure_mono (t := {ω | ∃ i ∈ I₀, p i ω ≤ 0}) ?_).trans
+      ((measure_exists_le_zero μ hp).trans_le bot_le)
+    rintro ω ⟨i, hi, h⟩
+    exact ⟨i, hi, h.trans (div_nonpos_of_nonpos_of_nonneg hα.le (Nat.cast_nonneg _))⟩
+  exact (measure_mono (fun _ ⟨i, hi, h⟩ ↦ ⟨i, hi, h.holmRejects hα⟩ :
     {ω | ∃ i ∈ I₀, BonferroniRejects α (fun j ↦ p j ω) i} ⊆
-      {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i})).trans (holm_fwer_le μ hp hα)
+      {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i})).trans (holm_fwer_le μ hp α)
 
 end LeanStats

@@ -35,7 +35,9 @@ namespace LeanStats
 variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- A random variable `p : Ω → ℝ` is a *valid p-value* under `μ` if it is super-uniform:
-`μ {ω | p ω ≤ t} ≤ t` for every `t ∈ [0, 1]`. -/
+`μ {ω | p ω ≤ t} ≤ t` for every `t ∈ [0, 1]`. For measurable `p` this is the usual definition.
+For non-measurable `p`, `μ` evaluates the event by its outer measure, so the condition is a
+(stronger) outer-measure bound, and the conclusions drawn from it are outer-measure bounds too. -/
 def IsValidPValue (μ : Measure Ω) (p : Ω → ℝ) : Prop :=
   ∀ t ∈ Set.Icc (0 : ℝ) 1, μ {ω | p ω ≤ t} ≤ ENNReal.ofReal t
 
