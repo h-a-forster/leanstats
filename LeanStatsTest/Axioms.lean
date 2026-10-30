@@ -3,14 +3,19 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import LeanStats
+module
+
+public import LeanStats
 
 /-!
 # Axiom audit
 
 The main theorems use only the three standard axioms of Lean and mathlib (`propext`,
-`Classical.choice`, `Quot.sound`). A `sorry` would add `sorryAx` and break these checks.
+`Classical.choice`, `Quot.sound`). An unfinished proof would add `sorryAx` and break these
+checks.
 -/
+
+public section
 
 /-- info: 'LeanStats.holm_fwer_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -43,3 +48,15 @@ The main theorems use only the three standard axioms of Lean and mathlib (`prope
 /-- info: 'LeanStats.coe_cpLower_self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms LeanStats.coe_cpLower_self
+
+/-- info: 'LeanStats.Supermartingale.mul_measure_exists_le_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms LeanStats.Supermartingale.mul_measure_exists_le_le
+
+/-- info: 'LeanStats.Supermartingale.mul_measure_exists_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms LeanStats.Supermartingale.mul_measure_exists_le
+
+/-- info: 'LeanStats.Supermartingale.measure_exists_le_le_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms LeanStats.Supermartingale.measure_exists_le_le_div
