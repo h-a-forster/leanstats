@@ -16,7 +16,7 @@ Concrete instances that pin down the definitions: they would fail if `HolmReject
 
 public section
 
-open LeanStats Finset ProbabilityTheory
+open LeanStats Finset MeasureTheory ProbabilityTheory
 
 namespace LeanStatsTest
 
@@ -62,6 +62,28 @@ example : ¬ HolmRejects 0.05 ![0.02, 0.02, 0.5] 0 := by
   have := h.le_div
   simp only [card_filter_fin_three] at this
   norm_num at this
+
+/-- The hypothesis `0 ≤ α` of `holmRejects_iff_stepDownRejects` is needed. For `α = -2` and the
+p-values `(-1, -1)`, Holm's shared threshold `-2 / 2` accepts both, while the sorted procedure
+fails `-1 ≤ -2 / 1` at the second position. -/
+example :
+    let σ : Fin (Fintype.card (Fin 2)) ≃ Fin 2 := finCongr (Fintype.card_fin 2)
+    Monotone ((fun _ ↦ (-1 : ℝ)) ∘ σ) ∧
+      HolmRejects (-2) (fun _ : Fin 2 ↦ (-1 : ℝ)) (σ ⟨1, by simp⟩) ∧
+      ¬ StepDownRejects (-2) (fun _ : Fin 2 ↦ (-1 : ℝ)) σ ⟨1, by simp⟩ := by
+  intro σ
+  refine ⟨fun _ _ _ ↦ le_rfl, fun j _ ↦ ?_, fun h ↦ ?_⟩
+  · simp
+  · have := h ⟨1, by simp⟩ le_rfl
+    simp at this
+
+/-- `IsValidPValue` is satisfiable: a uniform random variable on `[0, 1]` is a valid p-value. -/
+example : IsValidPValue (volume.restrict (Set.Icc (0 : ℝ) 1)) (fun x ↦ x) := by
+  intro t ht
+  rw [Measure.restrict_apply' measurableSet_Icc]
+  calc volume ({x : ℝ | x ≤ t} ∩ Set.Icc 0 1) ≤ volume (Set.Icc 0 t) :=
+        measure_mono fun x hx ↦ ⟨hx.2.1, hx.1⟩
+    _ = ENNReal.ofReal t := by simp [Real.volume_Icc]
 
 /-- One trial, no success, `α = 0.05`: the Clopper–Pearson upper bound is `1 - 0.025 = 0.975`. -/
 example : (cpUpper 1 0.05 0 : ℝ) = 0.975 := by

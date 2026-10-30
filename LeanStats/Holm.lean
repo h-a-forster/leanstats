@@ -19,9 +19,10 @@ We use an equivalent description that does not mention a sorting permutation: hy
 is rejected iff every `j` with `p j ≤ p i` satisfies `p j ≤ α / #{k | p j ≤ p k}`. Here
 `#{k | p j ≤ p k}` is `m - r + 1`, where `r` is the first sorted position holding the value
 `p j`. Tied p-values are therefore rejected together, which is what the sorted procedure does
-for every tie-breaking order (a later tied position has a larger threshold). The equivalence
-with the sorted formulation is `LeanStats.holmRejects_iff_stepDownRejects` in
-`LeanStats.HolmStepDown`.
+for every tie-breaking order when `α ≥ 0` (a later tied position has a larger threshold). The
+equivalence with the sorted formulation, for `α ≥ 0`, is
+`LeanStats.holmRejects_iff_stepDownRejects` in `LeanStats.HolmStepDown`. For `α < 0` the two
+can differ, but both reject only p-values `≤ 0`.
 
 ## Main definitions
 
