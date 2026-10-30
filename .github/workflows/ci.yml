@@ -20,11 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: No sorry, admit or axiom declarations
+      - name: No sorry, admit, axiom declarations or kernel bypasses
         run: sh scripts/check_no_sorry.sh
 
       # Installs the pinned toolchain, fetches the mathlib cache and runs `lake build`, which
-      # also builds LeanStatsTest (worked examples and the axiom audit of the main theorems).
+      # also builds LeanStatsTest (worked examples and the axiom audit of every declaration),
+      # then replays both libraries through the kernel with the bundled leanchecker.
       - uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6 # v1.6.2
+        env:
+          # leanchecker loads mathlib once per parallel check; one thread keeps memory bounded.
+          LEAN_NUM_THREADS: "1"
         with:
           build-args: "--wfail"
+          leanchecker: "true"
+          # The default target is derived from the package name, which is not a module here.
+          leanchecker-args: "LeanStats LeanStatsTest"

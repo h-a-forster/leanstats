@@ -12,10 +12,28 @@ public import LeanStats
 
 The main theorems use only the three standard axioms of Lean and mathlib (`propext`,
 `Classical.choice`, `Quot.sound`). An unfinished proof would add `sorryAx` and break these
-checks.
+checks. `#audit_leanstats_axioms` extends the check to every declaration in the `LeanStats`
+namespace, so a new declaration is audited without being listed here.
 -/
 
 public section
+
+open Lean Elab Command in
+/-- Fail unless every non-internal declaration in the `LeanStats` namespace depends only on
+`propext`, `Classical.choice` and `Quot.sound`; report how many declarations were checked. -/
+elab "#audit_leanstats_axioms" : command => do
+  let allowed := [``propext, ``Classical.choice, ``Quot.sound]
+  let names := (← getEnv).constants.fold (init := #[]) fun acc n _ ↦
+    if (`LeanStats).isPrefixOf n && !n.isInternal then acc.push n else acc
+  for n in names do
+    for a in ← collectAxioms n do
+      unless allowed.contains a do
+        throwError m!"{n} depends on the axiom {a}"
+  logInfo m!"{names.size} declarations in LeanStats use only the standard axioms"
+
+/-- info: 47 declarations in LeanStats use only the standard axioms -/
+#guard_msgs in
+#audit_leanstats_axioms
 
 /-- info: 'LeanStats.holm_fwer_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

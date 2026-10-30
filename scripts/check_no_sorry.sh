@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
-# Fail if any Lean source contains `sorry`, `admit`, `native_decide` or an `axiom` declaration.
-# `lake build` additionally checks the axioms of the main theorems (LeanStatsTest/Axioms.lean).
+# Fail if any Lean source contains `sorry`, `admit`, `native_decide`, an `axiom` declaration, or
+# a way around the kernel (`debug.skipKernelTC`, `implemented_by`, `extern`, `unsafe`,
+# `ofReduceBool`). `lake build` additionally audits the axioms of every declaration
+# (LeanStatsTest/Axioms.lean), and CI replays the environment through the kernel (leanchecker).
 set -eu
 cd "$(dirname "$0")/.."
 files=$(find LeanStats LeanStatsTest LeanStats.lean LeanStatsTest.lean -name '*.lean')
@@ -13,5 +15,9 @@ if grep -nE '^[[:space:]]*(@\[[^]]*\][[:space:]]*)?((private|protected|public|no
   echo "error: axiom declaration found" >&2
   status=1
 fi
-[ "$status" -eq 0 ] && echo "ok: no sorry, admit, native_decide or axiom declarations"
+if grep -nwE 'skipKernelTC|implemented_by|extern|unsafe|ofReduceBool' $files; then
+  echo "error: kernel bypass (skipKernelTC, implemented_by, extern, unsafe, ofReduceBool) found" >&2
+  status=1
+fi
+[ "$status" -eq 0 ] && echo "ok: no sorry, admit, native_decide, axiom declarations or kernel bypasses"
 exit "$status"
