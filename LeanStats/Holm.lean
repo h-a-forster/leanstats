@@ -3,8 +3,10 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import LeanStats.PValue
-import Mathlib.Data.Fintype.Card
+module
+
+public import LeanStats.PValue
+public import Mathlib.Data.Fintype.Card
 
 /-!
 # Holm's step-down procedure controls the family-wise error rate
@@ -18,7 +20,7 @@ is rejected iff every `j` with `p j ≤ p i` satisfies `p j ≤ α / #{k | p j �
 `#{k | p j ≤ p k}` is `m - r + 1`, where `r` is the first sorted position holding the value
 `p j`. Tied p-values are therefore rejected together, which is what the sorted procedure does
 for every tie-breaking order (a later tied position has a larger threshold). The equivalence
-with the sorted formulation is `LeanStats.holmRejects_iff_stepDown` in
+with the sorted formulation is `LeanStats.holmRejects_iff_stepDownRejects` in
 `LeanStats.HolmStepDown`.
 
 ## Main definitions
@@ -41,6 +43,8 @@ with the sorted formulation is `LeanStats.holmRejects_iff_stepDown` in
 * S. Holm, *A simple sequentially rejective multiple test procedure*, Scandinavian Journal of
   Statistics 6 (1979), 65–70.
 -/
+
+@[expose] public section
 
 open MeasureTheory Finset
 open scoped ENNReal

@@ -3,9 +3,11 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import LeanStats.Holm
-import Mathlib.Data.Fin.Tuple.Sort
-import Mathlib.Order.Interval.Finset.Fin
+module
+
+public import LeanStats.Holm
+public import Mathlib.Data.Fin.Tuple.Sort
+public import Mathlib.Order.Interval.Finset.Fin
 
 /-!
 # Holm's procedure as a sorted step-down procedure
@@ -27,6 +29,8 @@ hypothesis at position `r` iff `p (σ s) ≤ α / (m - s)` for every position `s
   step-down procedure and `HolmRejects` reject the same hypotheses. In particular the
   step-down procedure does not depend on how ties are broken.
 -/
+
+@[expose] public section
 
 open Finset
 

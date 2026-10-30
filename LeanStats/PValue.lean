@@ -3,7 +3,9 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
+module
+
+public import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
 
 /-!
 # Valid p-values
@@ -22,6 +24,8 @@ measurability, independence or continuity is assumed: the definition is stated w
 * `LeanStats.IsValidPValue.measure_le_le`: under a probability measure the bound
   `μ {p ≤ t} ≤ t` extends to every `t ≥ 0`.
 -/
+
+@[expose] public section
 
 open MeasureTheory
 open scoped ENNReal

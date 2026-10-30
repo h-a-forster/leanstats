@@ -3,7 +3,9 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import LeanStats
+module
+
+public import LeanStats
 
 /-!
 # Worked examples
@@ -11,6 +13,8 @@ import LeanStats
 Concrete instances that pin down the definitions: they would fail if `HolmRejects`,
 `BonferroniRejects` or the Clopper–Pearson bounds encoded a different procedure.
 -/
+
+public section
 
 open LeanStats Finset
 

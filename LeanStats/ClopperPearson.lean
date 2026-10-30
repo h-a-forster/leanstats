@@ -3,9 +3,11 @@ Copyright (c) 2026 leanstats contributors. All rights reserved.
 Released under the MIT license as described in the file LICENSE.
 Authors: leanstats contributors
 -/
-import Mathlib.Probability.Distributions.Binomial
-import Mathlib.Probability.HasLaw
-import Mathlib.Order.CompleteLatticeIntervals
+module
+
+public import Mathlib.Probability.Distributions.Binomial
+public import Mathlib.Probability.HasLaw
+public import Mathlib.Order.CompleteLatticeIntervals
 
 /-!
 # Coverage of the Clopper–Pearson interval
@@ -18,11 +20,12 @@ one-sided binomial tests of size `α / 2`:
 * the upper bound `cpUpper n α x` is the supremum of the `θ ∈ [0, 1]` for which
   `P_θ(X ≤ x) ≥ α / 2`.
 
-Because `θ ↦ P_θ(X ≥ x)` is increasing, `cpLower n α x` is the root of `P_θ(X ≥ x) = α / 2`
-(the `α / 2` quantile of `Beta(x, n - x + 1)` when `x ≥ 1`), and similarly for the upper bound.
-This file uses the infimum/supremum form, which needs no monotonicity, no Beta function and no
-root finding; the coverage proof does not depend on how the endpoints are computed, only on the
-fact that they bound the accepted parameters.
+Because `θ ↦ P_θ(X ≥ x)` is continuous and increasing, `cpLower n α x` is the root of
+`P_θ(X ≥ x) = α / 2` (the `α / 2` quantile of `Beta(x, n - x + 1)` when `x ≥ 1`), and
+similarly for the upper bound; this classical equivalence is not formalised here. This file
+uses the infimum/supremum form, which needs no monotonicity, no Beta function and no root
+finding; the coverage proof does not depend on how the endpoints are computed, only on the fact
+that they bound the accepted parameters.
 
 The bounds take values in `unitInterval`, which is a complete lattice, so the infimum and
 supremum always exist. The interval is the closed interval `Set.Icc (cpLower n α x)
@@ -45,6 +48,8 @@ supremum always exist. The interval is the closed interval `Set.Icc (cpLower n �
 * C. J. Clopper and E. S. Pearson, *The use of confidence or fiducial limits illustrated in
   the case of the binomial*, Biometrika 26 (1934), 404–413.
 -/
+
+@[expose] public section
 
 open MeasureTheory Set ProbabilityTheory Function
 open scoped ENNReal unitInterval
