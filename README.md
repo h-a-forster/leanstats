@@ -48,7 +48,8 @@ theorem bonferroni_fwer_le ... :
 null p-values need to be valid; their joint law, and everything about the non-null p-values,
 is arbitrary. Because the bound holds for every `I₀`, this is strong control of the FWER. The
 level `α` may be any real number (for `α < 0` both procedures reject only p-values `≤ 0`, an
-event of probability zero).
+event of probability zero). `holm_fwer_le_real` states the bound as a real probability,
+`μ.real {…} ≤ α`, for `α ≥ 0`.
 
 `HolmRejects` describes Holm's procedure without a sorting permutation. Theorem
 `holmRejects_iff_stepDownRejects` proves that it agrees with the textbook procedure ("sort
@@ -86,12 +87,17 @@ For interior observations, `binomial_real_Ici_cpLower` (`1 ≤ x ≤ n`) and
 `binomial_real_Iic_cpUpper` (`x < n`) show that the endpoints solve the textbook equations
 `P_θ(X ≥ x) = α/2` and `P_θ(X ≤ x) = α/2` for `0 < α ≤ 2`, and that the tail is strictly
 smaller beyond them, and `cpLower_le_cpUpper` shows that the interval is non-empty for
-`α ≤ 1`. `LeanStatsTest/Examples.lean` checks concrete values, including
+`α ≤ 1`. The upper tail is strictly increasing in `θ` and the lower tail strictly decreasing
+(`strictMono_binomial_real_Ici`, `strictAnti_binomial_real_Iic`), so each endpoint is the
+unique root of its equation (`binomial_real_Ici_eq_iff`, `binomial_real_Iic_eq_iff`), which is
+the textbook definition. `LeanStatsTest/Examples.lean` checks concrete values, including
 `cpUpper 2 α 1 = √(1 - α/2)` computed from the definition.
 
 The probabilistic core is `measure_setOf_measure_Iic_le`: for any measure on a countable
 linear order, `ν {x | ν (Iic x) ≤ t} ≤ t`. In words, the distribution function evaluated at
-the observation is super-uniform. It holds without any continuity assumption.
+the observation is super-uniform. It holds without any continuity assumption. The same holds
+for any measure on `ℝ` (`measure_setOf_measure_Iic_le_real`), and `measure_cdf_le` states it
+as `P(F(X) ≤ t) ≤ t` with mathlib's `cdf`.
 
 ### Ville ([LeanStats/Ville.lean](LeanStats/Ville.lean))
 
@@ -112,7 +118,7 @@ in `[0, ∞]`), whose event also contains paths that approach `ε` without reach
 | p-values are real random variables with `μ {p ≤ t} ≤ t` on `[0, 1]` | Standard definition. It covers discrete tests. For measurable `p` it is the usual definition; for non-measurable `p`, `μ` is the outer measure, so the hypothesis and the conclusions are outer-measure bounds and measurability is never needed. |
 | Holm is defined sort-free and proved equal to the sorted procedure | The sort-free form makes the FWER proof short. The equivalence theorem shows it is the textbook procedure. |
 | The true nulls `I₀` are a fixed `Finset` | This is the frequentist set-up: the truth is fixed and unknown. The theorem holds for every `I₀`. |
-| Clopper–Pearson endpoints are the inf/sup of the accepted parameters | Continuity of the tail in `θ` makes them the smallest (largest) root of `P_θ(X ≥ x) = α/2` (`P_θ(X ≤ x) = α/2`), which is proved. Monotonicity, which makes the root unique and gives the Beta-quantile form, is not needed for coverage and is not formalised (see AGENTS.md). |
+| Clopper–Pearson endpoints are the inf/sup of the accepted parameters | Continuity and strict monotonicity of the tail in `θ` make them the unique root of `P_θ(X ≥ x) = α/2` (`P_θ(X ≤ x) = α/2`), which is proved. Neither is needed for coverage. The identification with a Beta quantile is not formalised. |
 | Endpoints live in `unitInterval` | `unitInterval` is a complete lattice, so the endpoints always exist with no side conditions. |
 | Probabilities are in `ℝ≥0∞` (miss probability) and `ℝ` (coverage) | The `ℝ≥0∞` statement holds for every `α`. The coverage form needs `0 ≤ α`. |
 

@@ -21,8 +21,8 @@ that is at least a week old.
 ## Rules for proofs
 
 - No `sorry`, `admit`, new `axiom`, `native_decide` or kernel bypass in `LeanStats/` or
-  `LeanStatsTest/`. `LeanStatsTest/Axioms.lean` audits every declaration in the namespace;
-  add a new main theorem to the names listed after `#audit_leanstats_axioms`.
+  `LeanStatsTest/`. `LeanStatsTest/Axioms.lean` audits every declaration in the `LeanStats`
+  modules; add a new main theorem to the names listed after `#audit_leanstats_axioms`.
 - mathlib style: naming conventions, a module docstring with "Main statements", a docstring on
   every definition and main theorem, lines at most 100 characters. The build enables mathlib's
   standard linter set and CI treats warnings as errors.
@@ -34,7 +34,8 @@ that is at least a week old.
 
 ## Pull requests
 
-CI runs on pull requests (and manual dispatch): the source scan, then `lake build --wfail`
+CI runs on pull requests (and manual dispatch): the source scan and its self-test
+(`sh scripts/test_check_no_sorry.sh`; extend it when you extend the scan), then `lake build --wfail`
 through `leanprover/lean-action`, which also builds the examples and the axiom audit, then a
 kernel replay with leanchecker.
 Describe what is proved, and update README.md, docs/DESIGN.md and CHANGELOG.md when a statement

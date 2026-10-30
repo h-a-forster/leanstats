@@ -15,7 +15,7 @@ theory to statistics. Nothing here has been submitted yet.
 - **Style.** The files already build with `weak.linter.mathlibStandardSet = true`. Run
   `lake exe lint-style` and `#lint` in a mathlib checkout before opening a PR.
 
-## PR 1: super-uniformity of distribution functions on countable orders
+## PR 1: super-uniformity of distribution functions
 
 File: `Mathlib/MeasureTheory/Measure/Continuity.lean`, next to `measure_biUnion_eq_iSup`.
 
@@ -23,11 +23,12 @@ File: `Mathlib/MeasureTheory/Measure/Continuity.lean`, next to `measure_biUnion_
 |---|---|
 | `measure_setOf_measure_Iic_le` | `MeasureTheory.measure_setOf_measure_Iic_le` |
 | `measure_setOf_measure_Ici_le` | `MeasureTheory.measure_setOf_measure_Ici_le` |
+| `measure_setOf_measure_Iic_le_real`, `measure_setOf_measure_Ici_le_real` | `MeasureTheory.measure_setOf_measure_Iic_le_real`, `MeasureTheory.measure_setOf_measure_Ici_le_real` |
+| `measure_cdf_le` | `ProbabilityTheory.measure_setOf_cdf_le` in `Mathlib/Probability/CDF.lean` |
 
-Reviewers will likely ask for the version on `ℝ` (`P(F(X) ≤ t) ≤ t` for
-`ProbabilityTheory.cdf`), which needs right-continuity of the cdf (or the fact that
-`{x | ν (Iic x) ≤ t}` is an initial segment). Prove it before opening this PR, in
-`Mathlib/Probability/CDF.lean`, and keep the countable version as a corollary.
+The countable and real versions share one argument (cover the set by countably many of its
+own intervals); reviewers may ask for a single statement for linear orders with a countable
+order-dense subset.
 
 ## PR 2: binomial tails
 
@@ -39,18 +40,17 @@ File: `Mathlib/Probability/Distributions/Binomial.lean`.
 | `binomial_real_Iic` | `ProbabilityTheory.binomial_real_Iic` |
 | `binomial_real_Ici` | `ProbabilityTheory.binomial_real_Ici` |
 | `continuous_binomial_real_Ici`, `continuous_binomial_real_Iic` | `ProbabilityTheory.continuous_binomial_real_Ici`, `ProbabilityTheory.continuous_binomial_real_Iic` |
-
-Natural additions for the same PR: monotonicity of `θ ↦ Bin(n, θ).real (Ici x)` (stochastic
-ordering in `θ`), which makes the Clopper–Pearson endpoint roots unique and gives the
-Beta-quantile form.
+| `binomial_real_Ici_eq_eval` | `ProbabilityTheory.binomial_real_Ici_eq_eval_sum_bernsteinPolynomial` |
+| `derivative_sum_bernstein` | `bernsteinPolynomial.derivative_sum_Icc` in `Mathlib/RingTheory/Polynomial/Bernstein.lean` |
+| `strictMono_binomial_real_Ici`, `strictAnti_binomial_real_Iic` | `ProbabilityTheory.strictMono_binomial_real_Ici`, `ProbabilityTheory.strictAnti_binomial_real_Iic` |
 
 ## PR 3: valid p-values and Holm's procedure
 
 New directory `Mathlib/Probability/HypothesisTesting/`. Mathlib has no hypothesis-testing files
 yet, so this PR will need a design discussion on Zulip (#mathlib4 > probability) first. That
 thread should also settle the outer-measure convention of `IsValidPValue` (it agrees with the
-usual definition for measurable `p`) and whether to add a `Measure.real` form for measurable
-p-values.
+usual definition for measurable `p`) and whether the `Measure.real` form
+(`holm_fwer_le_real`) should assume measurability.
 
 `Mathlib/Probability/HypothesisTesting/PValue.lean`:
 
@@ -69,6 +69,7 @@ p-values.
 | `BonferroniRejects.holmRejects` | `ProbabilityTheory.BonferroniRejects.holmRejects` |
 | `HolmRejects.exists_le_div_card` | `ProbabilityTheory.HolmRejects.exists_le_div_card` |
 | `holm_fwer_le` | `ProbabilityTheory.measure_exists_holmRejects_le` (mathlib names describe the statement) |
+| `holm_fwer_le_real` | `ProbabilityTheory.measureReal_exists_holmRejects_le` |
 | `bonferroni_fwer_le` | `ProbabilityTheory.measure_exists_bonferroniRejects_le` |
 | `StepDownRejects` | `ProbabilityTheory.StepDownRejects` |
 | `holmRejects_iff_stepDownRejects` | `ProbabilityTheory.holmRejects_iff_stepDownRejects` |
@@ -94,6 +95,7 @@ p-values.
 | `binomial_real_Ici_lt_of_lt_cpLower`, `binomial_real_Iic_lt_of_cpUpper_lt` | `ProbabilityTheory.binomial_real_Ici_lt_of_lt_clopperPearsonLower`, `ProbabilityTheory.binomial_real_Iic_lt_of_clopperPearsonUpper_lt` |
 | `binomial_real_Ici_cpLower`, `binomial_real_Iic_cpUpper` | `ProbabilityTheory.binomial_real_Ici_clopperPearsonLower`, `ProbabilityTheory.binomial_real_Iic_clopperPearsonUpper` |
 | `cpLower_le_cpUpper` | `ProbabilityTheory.clopperPearsonLower_le_clopperPearsonUpper` |
+| `binomial_real_Ici_eq_iff`, `binomial_real_Iic_eq_iff` | `ProbabilityTheory.binomial_real_Ici_eq_iff_eq_clopperPearsonLower`, `ProbabilityTheory.binomial_real_Iic_eq_iff_eq_clopperPearsonUpper` |
 
 ## PR 5: Ville's inequality
 
@@ -117,4 +119,5 @@ live in `LeanStats`.
 > Adds `ProbabilityTheory.IsSuperUniform` and Holm's step-down procedure, with
 > family-wise error control at level `α` under arbitrary dependence
 > (`measure_exists_holmRejects_le`), Bonferroni as a corollary, and the equivalence of the
-> sort-free definition with the textbook sorted procedure for every tie-breaking order.
+> sort-free definition with the textbook sorted procedure for every tie-breaking order when
+> `α ≥ 0`.

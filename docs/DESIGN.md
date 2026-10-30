@@ -69,8 +69,11 @@ alone gives the root form: for `1 ≤ x ≤ n` and `0 < α ≤ 2`, `P_θ(X ≥ x
 accepted set is closed, so its infimum is accepted; the tail vanishes at `θ = 0`, so the
 infimum is positive, and continuity from the left forces equality. For `α ≤ 1` the interval is
 non-empty (`cpLower_le_cpUpper`: between the endpoints both tails would be `< α/2`, but they
-sum to at least 1). Monotonicity of the tail, which makes the root unique and gives the
-Beta-quantile form, is not formalised. None of this affects the coverage theorem, which holds
+sum to at least 1). The upper-tail polynomial is a sum of Bernstein polynomials whose
+derivative telescopes to `n · B_{n-1,x-1}(θ) > 0` on `(0, 1)`, so the tail is strictly
+increasing (`strictMono_binomial_real_Ici`; the lower tail is `1 -` an upper tail) and the root
+is unique (`binomial_real_Ici_eq_iff`, `binomial_real_Iic_eq_iff`). Its identification with a
+Beta quantile is not formalised. None of this affects the coverage theorem, which holds
 for the endpoints exactly as defined (and would hold for any wider interval, which is why
 these characterisations matter).
 
@@ -84,7 +87,9 @@ order and any `t`, `ν {x | ν (Iic x) ≤ t} ≤ t` (`measure_setOf_measure_Iic
 `Ici`). Proof: the set `A` is covered by the directed union `⋃_{x ∈ A} Iic x`, whose measure is
 the supremum of `ν (Iic x) ≤ t` over `x ∈ A` (`measure_biUnion_eq_iSup`). No continuity is
 needed, which is exactly why the discrete Clopper–Pearson interval is conservative rather than
-exact.
+exact. On `ℝ` (`measure_setOf_measure_Iic_le_real`, and `measure_cdf_le` for `cdf`) the set
+`A` is covered by countably many of its own `Iic x`: those at rational points of `A` and at its
+maximum, if it has one.
 
 ### 1.4 Ville (S3, stretch)
 
@@ -118,10 +123,12 @@ by continuity from below.
   proof to a dozen lines and moves the bookkeeping into a separate equivalence theorem.
 - **Endpoints in `unitInterval`.** With `ℝ`-valued `sInf`/`sSup` the empty-set and
   unboundedness conventions (`sInf ∅ = 0`) would need side conditions; `unitInterval` is a
-  complete linear order, so `sInf_le`/`le_sSup` apply directly. An empty accepted set (only for
-  `α > 2`) gives the empty interval, which is the right convention.
+  complete linear order, so `sInf_le`/`le_sSup` apply directly. An empty accepted set (for
+  `α > 2`, or for `x > n`, an event of probability zero) gives the empty interval, which is the
+  right convention.
 - **Level convention.** Each tail gets `α/2` (the equal-tailed Clopper–Pearson interval).
-  Coverage is `≥ 1 - α` for all `α`; for `α ≥ 1` it is trivial.
+  The miss bound `≤ α` holds for every `α`; the coverage form `≥ 1 - α` needs `α ≥ 0`, and
+  for `α ≥ 1` it is trivial.
 
 ## 3. Prior art
 

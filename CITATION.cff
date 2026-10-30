@@ -12,7 +12,6 @@ authors:
 repository-code: "https://github.com/h-a-forster/leanstats"
 license: MIT
 version: 0.1.0
-date-released: "2026-10-30"
 keywords:
   - lean4
   - mathlib

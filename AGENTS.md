@@ -41,40 +41,37 @@ and no data.
 | `LeanStats/PValue.lean` | `IsValidPValue` (super-uniform p-values) |
 | `LeanStats/Holm.lean` | `HolmRejects`, `BonferroniRejects`, deterministic core, `holm_fwer_le`, `bonferroni_fwer_le` |
 | `LeanStats/HolmStepDown.lean` | `StepDownRejects`, `holmRejects_iff_stepDownRejects`, existence of a sorting order |
-| `LeanStats/ClopperPearson.lean` | super-uniform distribution function, binomial tails, `cpLower`/`cpUpper`/`clopperPearson`, coverage, boundary values, closed forms, endpoints as roots of the tail equations |
+| `LeanStats/ClopperPearson.lean` | super-uniform distribution function (countable orders and `ℝ`), binomial tails, `cpLower`/`cpUpper`/`clopperPearson`, coverage, boundary values, closed forms, monotone tails, endpoints as unique roots of the tail equations |
 | `LeanStats/Ville.lean` | finite- and infinite-horizon Ville inequality, `∃` and `sup` forms |
 | `LeanStatsTest/Examples.lean` | worked examples pinning down the definitions |
-| `LeanStatsTest/Axioms.lean` | axiom audit of every declaration, plus the main theorems by name |
-| `scripts/check_no_sorry.sh` | source scan used by CI |
+| `LeanStatsTest/Axioms.lean` | axiom audit of every declaration in the `LeanStats` modules, plus the main theorems by name |
+| `scripts/check_no_sorry.sh` | source scan used by CI; `scripts/test_check_no_sorry.sh` plants each pattern and checks the scan rejects it |
 | `docs/PR.md` | mathlib upstreaming plan and renames |
 
-## Working on this machine
+## Working with mathlib locally
 
-Importing mathlib costs 1–4 minutes per `lean` process here, and each process holds several
-GB of memory. Do not open many files at once. For fast iteration keep a single Lean language
+Importing mathlib can cost minutes per `lean` process, and each process holds several GB of
+memory. Do not open many files at once. For fast iteration keep a single Lean language
 server running (`lake serve`) with one open document: re-checks then take seconds. Run
 `lake build` sequentially rather than in parallel shells.
 
 ## Status and next steps (2026-10-30)
 
-Done (v0.1.0 and Unreleased): Holm FWER (strong control, any real `α`) under arbitrary
-dependence, Bonferroni corollary, sort-free definition proved equal to the sorted step-down
-procedure; Clopper–Pearson coverage `≥ 1 - α` for every `n` and `p ∈ [0, 1]`, tail formulas,
-closed forms for `x = 0` and `x = n`, endpoints as the smallest/largest roots of the tail
-equations for interior `x`, non-empty interval for `α ≤ 1`; Ville's inequality in `∃` and
-`sup` forms. `lake build --wfail`, the axiom sweep, the source scan and leanchecker pass
-locally. CI has not run yet on GitHub (no pull request opened, no dispatch).
+Done (0.1.0, not yet tagged): Holm FWER (strong control, any real `α`; also as `μ.real`)
+under arbitrary dependence, Bonferroni corollary, sort-free definition proved equal to the
+sorted step-down procedure for `α ≥ 0`; Clopper–Pearson coverage `≥ 1 - α` for every `n` and
+`p ∈ [0, 1]`, tail formulas, closed forms for `x = 0` and `x = n`, strictly monotone tails and
+endpoints as the unique roots of the tail equations for interior `x`, non-empty interval for
+`α ≤ 1`; super-uniform distribution function on countable orders and on `ℝ` (`cdf`); Ville's
+inequality in `∃` and `sup` forms. `lake build --wfail`, the axiom sweep, the source scan and
+leanchecker pass locally. CI has not run yet on GitHub (no pull request opened, no dispatch);
+tag 0.1.0 after the first green run.
 
 Next, in order of value:
 
-1. **Monotonicity of binomial tails in `θ`**, which makes the endpoint roots unique and gives
-   the Beta-quantile form (continuity is already proved). Route: derivative of the tail sum is
-   `n · C(n-1, x-1) θ^(x-1) (1-θ)^(n-x) ≥ 0`, or a coupling `Bin(n, θ) ≤st Bin(n, θ')` via
-   mathlib's `setBernoulli` construction.
-2. Real-line version of the distribution-function lemma (`P(F(X) ≤ t) ≤ t` for
-   `ProbabilityTheory.cdf`), the natural mathlib generalisation (docs/PR.md, PR 1).
-3. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).
-4. A corollary of `holm_fwer_le` for measurable (or `AEMeasurable`) p-values stated with
-   `μ.real`, the form mathlib reviewers will expect next to the outer-measure version.
-5. Holm as closed testing with Bonferroni local tests; weighted Holm.
-6. Benjamini–Hochberg FDR control under independence/PRDS (a larger project).
+1. Run CI once on GitHub (owner's call: metered minutes), then tag 0.1.0.
+2. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).
+3. The Clopper–Pearson endpoints as quantiles of mathlib's Beta distribution (`betaPDF`): needs
+   `P_θ(X ≥ x) = ∫₀^θ betaPDF x (n - x + 1)`.
+4. Holm as closed testing with Bonferroni local tests; weighted Holm.
+5. Benjamini–Hochberg FDR control under independence/PRDS (a larger project).

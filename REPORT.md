@@ -1,4 +1,4 @@
-# Report: leanstats v0.1.0
+# Report: leanstats 0.1.0 (untagged)
 
 Date: 2026-10-30. Lean v4.35.0, mathlib `v4.35.0`
 (commit `56a005855ea17e0b0958f73ec801ae140b0a1679`).
@@ -6,18 +6,21 @@ Date: 2026-10-30. Lean v4.35.0, mathlib `v4.35.0`
 ## 1. Result
 
 All three targets are proved with no `sorry`, `admit`, `native_decide` or new axiom.
-Revised after two external reviews (section 5).
+Revised after external reviews (section 5).
 
 | Target | Main theorem | Status |
 |---|---|---|
 | Holm controls FWER at level `α` (strong control: every set of true nulls `I₀`), finite family, arbitrary dependence, any real `α` | `holm_fwer_le` | proved |
+| Holm FWER as a real probability (`μ.real`), `α ≥ 0` | `holm_fwer_le_real` | proved |
 | Bonferroni (corollary) | `bonferroni_fwer_le` | proved |
-| Holm definition = sorted step-down procedure, any tie-breaking | `holmRejects_iff_stepDownRejects` | proved |
+| Holm definition = sorted step-down procedure, any tie-breaking, for `α ≥ 0` | `holmRejects_iff_stepDownRejects` | proved |
 | Clopper–Pearson coverage `≥ 1 - α` for every `n`, every `p ∈ [0, 1]` | `one_sub_le_binomial_clopperPearson`, `binomial_clopperPearson_not_mem_le`, `HasLaw.one_sub_le_clopperPearson` | proved |
 | Clopper–Pearson endpoints solve `P_θ(X ≥ x) = α/2` (`1 ≤ x ≤ n`) and `P_θ(X ≤ x) = α/2` (`x < n`), `0 < α ≤ 2`; interval non-empty for `α ≤ 1` | `binomial_real_Ici_cpLower`, `binomial_real_Iic_cpUpper`, `cpLower_le_cpUpper` | proved |
+| Tails strictly monotone in `θ`, so each endpoint is the unique root of its tail equation | `strictMono_binomial_real_Ici`, `strictAnti_binomial_real_Iic`, `binomial_real_Ici_eq_iff`, `binomial_real_Iic_eq_iff` | proved |
+| Distribution function is super-uniform for any measure on `ℝ`: `P(F(X) ≤ t) ≤ t` | `measure_cdf_le`, `measure_setOf_measure_Iic_le_real`, `measure_setOf_measure_Ici_le_real` | proved |
 | Ville's inequality (stretch), `∃ k` and `sup_k` forms | `Supermartingale.mul_measure_exists_le`, `Supermartingale.measure_exists_le_le_div`, `Supermartingale.mul_measure_le_iSup` | proved |
 
-Size: 790 lines in `LeanStats/` (44 definitions and theorems), plus 196 lines of examples and
+Size: 946 lines in `LeanStats/` (54 definitions and theorems), plus 218 lines of examples and
 audit in `LeanStatsTest/`.
 
 A formal proof has no sampling error, so there are no intervals to report for the theorems
@@ -27,18 +30,18 @@ themselves. The quantities below are measurements of the checks.
 
 | Check | Command | Outcome |
 |---|---|---|
-| Kernel-checked build, warnings as errors, mathlib standard linters | `lake build --wfail` | passes (3129 jobs) |
-| Axioms of every declaration | `LeanStatsTest/Axioms.lean`: `#audit_leanstats_axioms` sweeps the `LeanStats` namespace and requires 11 named main theorems to be among the audited declarations | 47 declarations (44 source declarations and 3 equation lemmas), each within `[propext, Classical.choice, Quot.sound]`. Verified to fail on a planted `sorry` theorem in the namespace, an unknown name and a listed name outside the namespace |
+| Kernel-checked build, warnings as errors, mathlib standard linters | `lake build --wfail` | passes (3146 jobs) |
+| Axioms of every declaration | `LeanStatsTest/Axioms.lean`: `#audit_leanstats_axioms` sweeps every non-internal declaration made in a `LeanStats` module, whatever its namespace, and requires 15 named main theorems to be among the audited declarations | 57 declarations (54 source declarations and 3 equation lemmas), each within `[propext, Classical.choice, Quot.sound]`. Verified to fail on a planted `sorry` theorem in the namespace, an unknown name and a listed name outside the library, and on a planted `sorry` theorem in the root namespace inside a `LeanStats` module (the previous namespace-only sweep passed it) |
 | Audit catches a gap | replaced the proof of `bonferroni_fwer_le` by `sorry` and rebuilt | build failed: `depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]` |
-| Source scan | `sh scripts/check_no_sorry.sh` | passes. Verified to fail on a planted `sorry`, a planted `axiom`, and planted `set_option debug.skipKernelTC`, `implemented_by`, `extern` and `unsafe` (the previous scan passed the `skipKernelTC` plant). Also fails on each of `sorryAx`, `addDeclWithoutChecking`, `addDeclCore`, `modifyEnv`, `run_cmd`, `run_elab`, `run_meta` and on `debug.skipKernelTC` in `lakefile.toml`, all of which the previous scan passed. Commands that edit the environment are only caught reliably by the kernel replay |
-| Kernel replay | `LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest` (also in CI) | passes in 169–344 s on this machine (three runs: 169 s, 344 s, 330 s; load varies). Without module arguments leanchecker looks for a module named after the package (`Leanstats`) and fails, so CI passes them explicitly |
-| Definitions mean what they say | `LeanStatsTest/Examples.lean` | Holm rejects all of `(0.01, 0.02, 0.04)` at `α = 0.05` while Bonferroni misses `0.02`. Holm stops at `0.03 > 0.05/2` in `(0.01, 0.03, 0.04)` and does not reject `0.04`. Holm rejects neither tied value in `(0.02, 0.02, 0.5)` (a strict-count variant would reject both; checked separately). `cpUpper 1 0.05 0 = 0.975`. `cpLower 10 0.05 10 = 0.025^(1/10)`. `0.308 < cpUpper 10 0.05 0 < 0.309` and `0.115 < cpUpper 30 0.05 0 < 0.116`. Interior: `cpUpper 2 α 1 = √(1 - α/2)` from the definition, and `P(X ≥ 1) = 0.025` at `cpLower 2 0.05 1`. A uniform variable on `[0, 1]` satisfies `IsValidPValue` (the hypothesis is satisfiable). For `α = -2` and p-values `(-1, -1)` Holm and the sorted procedure disagree, so the `0 ≤ α` hypothesis of the equivalence is needed |
+| Source scan | `sh scripts/check_no_sorry.sh` | passes. Verified to fail on a planted `sorry`, a planted `axiom`, and planted `set_option debug.skipKernelTC`, `implemented_by`, `extern` and `unsafe` (the previous scan passed the `skipKernelTC` plant). Also fails on each of `sorryAx`, `addDeclWithoutChecking`, `addDeclCore`, `modifyEnv`, `run_cmd`, `run_elab`, `run_meta` and on `debug.skipKernelTC` in `lakefile.toml`, all of which the previous scan passed. Also fails on `setEnv`, `addConstAsync`, `initialize`, `builtin_initialize`, a `[leanOptions.debug]` table and a `lakefile.lean`, which the previous scan passed. `sh scripts/test_check_no_sorry.sh` (also in CI) plants every pattern in a scratch copy and checks that the scan fails on each. Commands that edit the environment are only caught reliably by the kernel replay |
+| Kernel replay | `LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest` (also in CI) | passes in 169–372 s (six local runs across revisions: 169, 204, 254, 330, 344 and 372 s; load varies; 254 s on the current sources). Without module arguments leanchecker looks for a module named after the package (`Leanstats`) and fails, so CI passes them explicitly |
+| Definitions mean what they say | `LeanStatsTest/Examples.lean` | Holm rejects all of `(0.01, 0.02, 0.04)` at `α = 0.05` while Bonferroni misses `0.02`. Holm stops at `0.03 > 0.05/2` in `(0.01, 0.03, 0.04)` and does not reject `0.04`. Holm rejects neither tied value in `(0.02, 0.02, 0.5)` (a strict-count variant would reject both; checked separately). `cpUpper 1 0.05 0 = 0.975`. `cpLower 10 0.05 10 = 0.025^(1/10)`. `0.308 < cpUpper 10 0.05 0 < 0.309` and `0.115 < cpUpper 30 0.05 0 < 0.116`. Interior: `cpUpper 2 α 1 = √(1 - α/2)` from the definition, `P(X ≥ 1) = 0.025` at `cpLower 2 0.05 1`, and `cpLower 2 0.05 1 = 1 - √0.975` from uniqueness of the root. A uniform variable on `[0, 1]` satisfies `IsValidPValue` (the hypothesis is satisfiable). For `α = -2` and p-values `(-1, -1)` Holm and the sorted procedure disagree, so the `0 ≤ α` hypothesis of the equivalence is needed |
 
 The Clopper–Pearson closed forms agree with standard tables:
 `cpLower 10 0.05 10 = 0.025^(1/10) = 0.6915`, `cpUpper 10 0.05 0 = 0.3085` and
 `cpUpper 30 0.05 0 = 0.1157`. The last two are pinned to three decimals in Lean.
 
-## 3. Build measurements (this machine, shared and heavily loaded)
+## 3. Build measurements (one development machine, under varying load)
 
 | Step | Wall time |
 |---|---|
@@ -51,20 +54,17 @@ language server, which keeps imports loaded, re-checks a file in 1–3 s.
 
 ## 4. Limitations
 
-- **Endpoint uniqueness not formalised.** The Clopper–Pearson endpoints are defined as the
+- **Beta-quantile form not formalised.** The Clopper–Pearson endpoints are defined as the
   infimum/supremum of the accepted parameters. Coverage alone cannot tell them from a wider
   interval, so their meaning rests on the characterisations: the closed forms for `x = 0` and
-  `x = n`, and, for interior `x`, the proof that each endpoint solves its tail equation with a
-  smaller tail beyond it (the smallest/largest root). That this root is unique, and so equals
-  the Beta quantile, needs monotonicity of the tail in `θ`, which is not proved here.
+  `x = n`, and, for interior `x`, the proof that each endpoint is the unique root of its tail
+  equation (the textbook definition). The identification of that root with a quantile of the
+  Beta distribution is not proved.
 - **CI has not run on GitHub.** The workflow runs on pull requests and manual dispatch only,
   and no run has happened yet. Every step it runs (source scan, `lake build --wfail`,
   leanchecker with the same arguments) was run locally. The kernel replay is the only check
   that catches a declaration added without kernel checking, so README and CONTRIBUTING list it
   as a local step.
-- **Real-line distribution-function lemma not proved.** `measure_setOf_measure_Iic_le` is
-  stated for countable linear orders, which covers the binomial case but not the general
-  `P(F(X) ≤ t) ≤ t` for real random variables.
 - **Holm is stated for a fixed set of true nulls `I₀`.** This is the standard frequentist
   statement (it holds for every `I₀`). Data-dependent or random hypotheses are not modelled.
 - **No closed-testing proof.** Holm's procedure is proved directly, not as a closed testing
@@ -106,3 +106,17 @@ Not changed: monotonicity of the binomial tails and uniqueness of the endpoint r
 real-line distribution-function lemma and a `μ.real` corollary for measurable p-values (all
 planned before upstreaming, AGENTS.md and docs/PR.md), and running CI on GitHub (metered
 minutes).
+
+A third pass handled the review findings that the earlier follow-ups had not reached:
+
+- The tails are strictly monotone in `θ`, so the endpoints are the unique roots of the tail
+  equations; new example `cpLower 2 0.05 1 = 1 - √0.975`.
+- The distribution-function lemma holds for any measure on `ℝ` (`measure_cdf_le`).
+- `holm_fwer_le_real`: the Holm bound as a real probability.
+- The axiom sweep covers every declaration made in a `LeanStats` module, not only those in the
+  namespace. The source scan rejects `setEnv`, `addConstAsync`, `initialize`, a
+  `[leanOptions.debug]` table and a `lakefile.lean`, and a self-test checks every pattern.
+- Documentation: `α ≥ 0` for the step-down equivalence in this report and docs/PR.md; DESIGN
+  edge cases; machine-specific wording; 0.1.0 marked as not yet tagged; private reporting.
+
+Still not done: running CI on GitHub and tagging 0.1.0 (both need the owner).
