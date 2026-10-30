@@ -20,12 +20,13 @@ one-sided binomial tests of size `α / 2`:
 * the upper bound `cpUpper n α x` is the supremum of the `θ ∈ [0, 1]` for which
   `P_θ(X ≤ x) ≥ α / 2`.
 
-Because `θ ↦ P_θ(X ≥ x)` is continuous and increasing, `cpLower n α x` is the root of
-`P_θ(X ≥ x) = α / 2` (the `α / 2` quantile of `Beta(x, n - x + 1)` when `x ≥ 1`), and
-similarly for the upper bound; this classical equivalence is not formalised here. This file
-uses the infimum/supremum form, which needs no monotonicity, no Beta function and no root
-finding; the coverage proof does not depend on how the endpoints are computed, only on the fact
-that they bound the accepted parameters.
+The tails are continuous in `θ`, so for `1 ≤ x ≤ n` and `0 < α ≤ 2` the lower bound is the
+smallest root of `P_θ(X ≥ x) = α / 2`: the tail equals `α / 2` there and is smaller for every
+smaller `θ`. The same holds for the upper bound and `P_θ(X ≤ x)` when `x < n`. The tails are
+also increasing (resp. decreasing), which makes the root unique and equal to the `α / 2`
+quantile of `Beta(x, n - x + 1)`; that last step is not formalised here. The coverage proof
+does not depend on how the endpoints are computed, only on the fact that they bound the
+accepted parameters.
 
 The bounds take values in `unitInterval`, which is a complete lattice, so the infimum and
 supremum always exist. The interval is the closed interval `Set.Icc (cpLower n α x)
@@ -42,6 +43,9 @@ supremum always exist. The interval is the closed interval `Set.Icc (cpLower n �
   and every `p ∈ [0, 1]`.
 * `LeanStats.HasLaw.one_sub_le_clopperPearson`: the same for any random variable with law
   `Bin(n, p)`.
+* `LeanStats.binomial_real_Ici_cpLower` and `LeanStats.binomial_real_Iic_cpUpper`: the
+  endpoints solve the tail equations `P_θ(X ≥ x) = α / 2` and `P_θ(X ≤ x) = α / 2`.
+* `LeanStats.cpLower_le_cpUpper`: for `α ≤ 1` the interval is non-empty.
 
 ## References
 
@@ -234,5 +238,104 @@ theorem coe_cpLower_self {n : ℕ} (hn : 0 < n) {α : ℝ} (hα₀ : 0 ≤ α) (
     simp only [Nat.choose_self, Nat.cast_one, one_mul, Nat.sub_self, pow_zero, mul_one]
     rw [← Real.rpow_natCast, ← Real.rpow_inv_le_iff_of_pos (by linarith) θ.2.1 (by positivity)]
   rw [cpLower, hS, csInf_Ici]
+
+/-! ### Endpoints as roots of the tail equations
+
+For `1 ≤ x ≤ n` the lower bound solves `P_θ(X ≥ x) = α / 2`, and every smaller `θ` has a
+smaller tail; for `x < n` the upper bound solves `P_θ(X ≤ x) = α / 2`, and every larger `θ`
+has a smaller lower tail. Only continuity of the tails in `θ` is used. -/
+
+/-- The upper tail `θ ↦ P_θ(X ≥ x)` is continuous. -/
+theorem continuous_binomial_real_Ici (n x : ℕ) :
+    Continuous fun θ : I ↦ Bin(n, θ).real (Ici x) := by
+  simp_rw [binomial_real_Ici]
+  fun_prop
+
+/-- The lower tail `θ ↦ P_θ(X ≤ x)` is continuous. -/
+theorem continuous_binomial_real_Iic (n x : ℕ) :
+    Continuous fun θ : I ↦ Bin(n, θ).real (Iic x) := by
+  simp_rw [binomial_real_Iic]
+  fun_prop
+
+/-- Below the lower bound the upper tail is strictly less than `α / 2`. -/
+theorem binomial_real_Ici_lt_of_lt_cpLower {n : ℕ} {α : ℝ} {x : ℕ} {θ : I}
+    (h : θ < cpLower n α x) : Bin(n, θ).real (Ici x) < α / 2 :=
+  lt_of_not_ge fun h' ↦ h.not_ge (sInf_le h')
+
+/-- Above the upper bound the lower tail is strictly less than `α / 2`. -/
+theorem binomial_real_Iic_lt_of_cpUpper_lt {n : ℕ} {α : ℝ} {x : ℕ} {θ : I}
+    (h : cpUpper n α x < θ) : Bin(n, θ).real (Iic x) < α / 2 :=
+  lt_of_not_ge fun h' ↦ h.not_ge (le_sSup h')
+
+/-- **The lower bound is a root.** For `1 ≤ x ≤ n` and `0 < α ≤ 2`,
+`P_θ(X ≥ x) = α / 2` at `θ = cpLower n α x`. -/
+theorem binomial_real_Ici_cpLower {n x : ℕ} (hx : 1 ≤ x) (hxn : x ≤ n) {α : ℝ} (hα₀ : 0 < α)
+    (hα₂ : α ≤ 2) : Bin(n, cpLower n α x).real (Ici x) = α / 2 := by
+  have hg := continuous_binomial_real_Ici n x
+  have h1 : Bin(n, (1 : I)).real (Ici x) = 1 := by
+    rw [binomial_real_Ici, Finset.sum_eq_single n]
+    · simp
+    · intro k hk hkn
+      have : n - k ≠ 0 := by have := (Finset.mem_Icc.1 hk).2; omega
+      simp [this]
+    · exact fun h ↦ absurd (Finset.mem_Icc.2 ⟨hxn, le_rfl⟩) h
+  have h0 : Bin(n, (0 : I)).real (Ici x) = 0 := by
+    rw [binomial_real_Ici]
+    refine Finset.sum_eq_zero fun k hk ↦ ?_
+    have : k ≠ 0 := by have := (Finset.mem_Icc.1 hk).1; omega
+    simp [this]
+  set c := cpLower n α x
+  have hmem : α / 2 ≤ Bin(n, c).real (Ici x) :=
+    (isClosed_le continuous_const hg).csInf_mem ⟨1, by simp only [mem_ofPred_eq, h1]; linarith⟩
+      (OrderBot.bddBelow _)
+  have hc : (0 : I) < c := by
+    refine lt_of_le_of_ne unitInterval.nonneg' fun h ↦ ?_
+    rw [← h, h0] at hmem
+    linarith
+  have hle : c ∈ {θ : I | Bin(n, θ).real (Ici x) ≤ α / 2} :=
+    closure_minimal (s := Iio c) (fun θ hθ ↦ (binomial_real_Ici_lt_of_lt_cpLower hθ).le)
+      (isClosed_le hg continuous_const)
+      (by rw [closure_Iio' (a := c) ⟨0, hc⟩]; exact mem_Iic.2 le_rfl)
+  exact le_antisymm hle hmem
+
+/-- **The upper bound is a root.** For `x < n` and `0 < α ≤ 2`, `P_θ(X ≤ x) = α / 2` at
+`θ = cpUpper n α x`. -/
+theorem binomial_real_Iic_cpUpper {n x : ℕ} (hxn : x < n) {α : ℝ} (hα₀ : 0 < α)
+    (hα₂ : α ≤ 2) : Bin(n, cpUpper n α x).real (Iic x) = α / 2 := by
+  have hg := continuous_binomial_real_Iic n x
+  have h0 : Bin(n, (0 : I)).real (Iic x) = 1 := by
+    rw [binomial_real_Iic, Finset.sum_eq_single 0]
+    · simp
+    · intro k _ hk
+      simp [hk]
+    · simp
+  have h1 : Bin(n, (1 : I)).real (Iic x) = 0 := by
+    rw [binomial_real_Iic]
+    refine Finset.sum_eq_zero fun k hk ↦ ?_
+    have : n - k ≠ 0 := by have := Finset.mem_Iic.1 hk; omega
+    simp [this]
+  set c := cpUpper n α x
+  have hmem : α / 2 ≤ Bin(n, c).real (Iic x) :=
+    (isClosed_le continuous_const hg).csSup_mem ⟨0, by simp only [mem_ofPred_eq, h0]; linarith⟩
+      (OrderTop.bddAbove _)
+  have hc : c < 1 := by
+    refine lt_of_le_of_ne unitInterval.le_one' fun h ↦ ?_
+    rw [h, h1] at hmem
+    linarith
+  have hle : c ∈ {θ : I | Bin(n, θ).real (Iic x) ≤ α / 2} :=
+    closure_minimal (s := Ioi c) (fun θ hθ ↦ (binomial_real_Iic_lt_of_cpUpper_lt hθ).le)
+      (isClosed_le hg continuous_const)
+      (by rw [closure_Ioi' (a := c) ⟨1, hc⟩]; exact mem_Ici.2 le_rfl)
+  exact le_antisymm hle hmem
+
+/-- For `α ≤ 1` the lower bound is at most the upper bound, so the interval is non-empty. -/
+theorem cpLower_le_cpUpper (n : ℕ) {α : ℝ} (hα : α ≤ 1) (x : ℕ) :
+    cpLower n α x ≤ cpUpper n α x := by
+  by_contra! h
+  obtain ⟨θ, hu, hl⟩ := exists_between h
+  have h1 : 1 ≤ Bin(n, θ).real (Iic x) + Bin(n, θ).real (Ici x) := by
+    rw [← probReal_univ (μ := Bin(n, θ)), ← Iic_union_Ici (a := x)]
+    exact measureReal_union_le _ _
+  linarith [binomial_real_Ici_lt_of_lt_cpLower hl, binomial_real_Iic_lt_of_cpUpper_lt hu]
 
 end LeanStats
