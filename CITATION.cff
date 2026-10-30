@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: "If you use leanstats, please cite it as below."
+title: leanstats
+abstract: >-
+  Lean 4 and mathlib proofs that Holm's step-down procedure controls the family-wise error
+  rate under arbitrary dependence, that Clopper-Pearson intervals have coverage at least
+  1 - alpha for every success probability, and of Ville's inequality for non-negative
+  supermartingales.
+type: software
+authors:
+  - name: h-a-forster
+repository-code: "https://github.com/h-a-forster/leanstats"
+license: MIT
+version: 0.1.0
+date-released: "2026-10-30"
+keywords:
+  - lean4
+  - mathlib
+  - formal verification
+  - multiple testing
+  - confidence intervals
+  - martingales
+references:
+  - type: article
+    authors:
+      - family-names: Holm
+        given-names: Sture
+    title: "A simple sequentially rejective multiple test procedure"
+    journal: "Scandinavian Journal of Statistics"
+    volume: 6
+    year: 1979
+    start: 65
+    end: 70
+  - type: article
+    authors:
+      - family-names: Clopper
+        given-names: C. J.
+      - family-names: Pearson
+        given-names: E. S.
+    title: "The use of confidence or fiducial limits illustrated in the case of the binomial"
+    journal: Biometrika
+    volume: 26
+    year: 1934
+    start: 404
+    end: 413
+    doi: 10.1093/biomet/26.4.404
+  - type: book
+    authors:
+      - family-names: Ville
+        given-names: Jean
+    title: "Étude critique de la notion de collectif"
+    publisher:
+      name: Gauthier-Villars
+    year: 1939
