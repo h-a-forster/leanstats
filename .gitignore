@@ -1,0 +1,7 @@
+/.lake/
+tmp/
+runs/
+data/
+cache/
+.env
+.env.*

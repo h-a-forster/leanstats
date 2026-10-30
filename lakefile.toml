@@ -1,0 +1,21 @@
+name = "leanstats"
+version = "0.1.0"
+defaultTargets = ["LeanStats", "LeanStatsTest"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+weak.linter.style.header.license = "Released under the MIT license as described in the file LICENSE."
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0"
+
+[[lean_lib]]
+name = "LeanStats"
+
+[[lean_lib]]
+name = "LeanStatsTest"
