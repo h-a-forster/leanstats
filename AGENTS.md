@@ -19,15 +19,16 @@ and no data.
 - Files are Lean modules: `module`, `public import`, `@[expose] public section`. Namespace
   `LeanStats`. MIT header with `Authors: leanstats contributors` (the header linter is
   configured for MIT in `lakefile.toml`).
-- No `sorry`, `admit`, `native_decide` or `axiom` (`scripts/check_no_sorry.sh`). Every new main
-  theorem gets a `#guard_msgs`/`#print axioms` entry in `LeanStatsTest/Axioms.lean`.
+- No `sorry`, `admit`, `native_decide`, `axiom` or kernel bypass (`scripts/check_no_sorry.sh`).
+  `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every declaration (update
+  its count when adding one); every new main theorem also gets a named `#print axioms` entry.
 - Every new definition gets evidence that it is faithful: a characterisation theorem, a
   closed form or a worked example in `LeanStatsTest/Examples.lean`.
 - mathlib style and naming. `lake build --wfail` must pass with the standard linter set.
   Search mathlib (`exact?`, Loogle, the docs) before writing a helper lemma.
 - CI (`.github/workflows/ci.yml`) runs on pull requests and manual dispatch only (metered
   private minutes): the source scan, then `leanprover/lean-action` (pinned by SHA) with
-  `--wfail`.
+  `--wfail` and a leanchecker replay (`LEAN_NUM_THREADS=1`, modules passed explicitly).
 - Scratch files go in `tmp/` (gitignored). Commits end with
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. No personal names, local paths or
   machine details in committed files.
@@ -39,10 +40,10 @@ and no data.
 | `LeanStats/PValue.lean` | `IsValidPValue` (super-uniform p-values) |
 | `LeanStats/Holm.lean` | `HolmRejects`, `BonferroniRejects`, deterministic core, `holm_fwer_le`, `bonferroni_fwer_le` |
 | `LeanStats/HolmStepDown.lean` | `StepDownRejects`, `holmRejects_iff_stepDownRejects`, existence of a sorting order |
-| `LeanStats/ClopperPearson.lean` | super-uniform distribution function, binomial tails, `cpLower`/`cpUpper`/`clopperPearson`, coverage, boundary values, closed forms |
-| `LeanStats/Ville.lean` | finite- and infinite-horizon Ville inequality |
+| `LeanStats/ClopperPearson.lean` | super-uniform distribution function, binomial tails, `cpLower`/`cpUpper`/`clopperPearson`, coverage, boundary values, closed forms, endpoints as roots of the tail equations |
+| `LeanStats/Ville.lean` | finite- and infinite-horizon Ville inequality, `∃` and `sup` forms |
 | `LeanStatsTest/Examples.lean` | worked examples pinning down the definitions |
-| `LeanStatsTest/Axioms.lean` | axiom audit of the main theorems |
+| `LeanStatsTest/Axioms.lean` | axiom audit of every declaration, plus the main theorems by name |
 | `scripts/check_no_sorry.sh` | source scan used by CI |
 | `docs/PR.md` | mathlib upstreaming plan and renames |
 
@@ -55,19 +56,20 @@ server running (`lake serve`) with one open document: re-checks then take second
 
 ## Status and next steps (2026-10-30)
 
-Done (v0.1.0): Holm FWER under arbitrary dependence, Bonferroni corollary, sort-free
-definition proved equal to the sorted step-down procedure; Clopper–Pearson coverage
-`≥ 1 - α` for every `n` and `p ∈ [0, 1]`, tail formulas, closed forms for `x = 0` and `x = n`;
-Ville's inequality (stretch). `lake build --wfail` passes, the axiom audit passes, the source
-scan passes. CI has not run yet on GitHub (no pull request opened).
+Done (v0.1.0 and Unreleased): Holm FWER (strong control, any real `α`) under arbitrary
+dependence, Bonferroni corollary, sort-free definition proved equal to the sorted step-down
+procedure; Clopper–Pearson coverage `≥ 1 - α` for every `n` and `p ∈ [0, 1]`, tail formulas,
+closed forms for `x = 0` and `x = n`, endpoints as the smallest/largest roots of the tail
+equations for interior `x`, non-empty interval for `α ≤ 1`; Ville's inequality in `∃` and
+`sup` forms. `lake build --wfail`, the axiom sweep, the source scan and leanchecker pass
+locally. CI has not run yet on GitHub (no pull request opened, no dispatch).
 
 Next, in order of value:
 
-1. **Monotonicity of binomial tails in `θ`** (`θ ↦ Bin(n, θ).real (Ici x)` is monotone and
-   continuous), then the root characterisation `P_{cpLower}(X ≥ x) = α/2` for `x ≥ 1`. This
-   turns the inf/sup definition into the textbook "solve for θ" form. Route: derivative of the
-   tail sum is `n · C(n-1, x-1) θ^(x-1) (1-θ)^(n-x) ≥ 0`, or a coupling `Bin(n, θ) ≤st Bin(n, θ')`
-   via mathlib's `setBernoulli` construction.
+1. **Monotonicity of binomial tails in `θ`**, which makes the endpoint roots unique and gives
+   the Beta-quantile form (continuity is already proved). Route: derivative of the tail sum is
+   `n · C(n-1, x-1) θ^(x-1) (1-θ)^(n-x) ≥ 0`, or a coupling `Bin(n, θ) ≤st Bin(n, θ')` via
+   mathlib's `setBernoulli` construction.
 2. Real-line version of the distribution-function lemma (`P(F(X) ≤ t) ≤ t` for
    `ProbabilityTheory.cdf`), the natural mathlib generalisation (docs/PR.md, PR 1).
 3. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).

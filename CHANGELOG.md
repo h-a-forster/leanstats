@@ -5,6 +5,24 @@ project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- Clopper–Pearson endpoints solve the tail equations: `binomial_real_Ici_cpLower`
+  (`1 ≤ x ≤ n`), `binomial_real_Iic_cpUpper` (`x < n`), with strict tail bounds beyond the
+  endpoints, continuity of the tails in `θ`, and `cpLower_le_cpUpper` for `α ≤ 1`.
+- Ville's inequality in supremum form (`Supermartingale.mul_measure_le_iSup`).
+- `measure_exists_le_zero`: valid p-values are almost surely positive.
+- Axiom audit of every declaration in the `LeanStats` namespace; leanchecker kernel replay in
+  CI; the source scan rejects `debug.skipKernelTC`, `implemented_by`, `extern`, `unsafe` and
+  `ofReduceBool`.
+- Examples: tied p-values, an interior Clopper–Pearson value, decimal bounds for
+  `cpUpper 10 0.05 0` and `cpUpper 30 0.05 0`.
+
+### Changed
+
+- `holm_fwer_le` and `bonferroni_fwer_le` take the level `α` explicitly and no longer assume
+  `0 ≤ α`.
+
 ## 0.1.0 - 2026-10-30
 
 ### Added

@@ -12,9 +12,10 @@ shows the problem.
 
 ## In scope
 
-- A proof that is accepted by `lake build` but relies on `sorry`, a new `axiom`, `native_decide`,
-  `implemented_by`/`extern` tricks or any other way around the kernel, without the axiom audit
-  (`LeanStatsTest/Axioms.lean`) or `scripts/check_no_sorry.sh` catching it.
+- A proof that is accepted by CI but relies on `sorry`, a new `axiom`, `native_decide`,
+  `implemented_by`/`extern`, `debug.skipKernelTC` or any other way around the kernel, without
+  the axiom audit (`LeanStatsTest/Axioms.lean`), `scripts/check_no_sorry.sh` or the leanchecker
+  kernel replay in CI catching it.
 - A definition that does not mean what the README and docs/DESIGN.md say it means (for
   example, a Clopper–Pearson interval that is trivially `[0, 1]`).
 - CI configuration that runs untrusted code or uses an unpinned action.

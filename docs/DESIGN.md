@@ -17,14 +17,17 @@ Notation: `Ω` is a measurable space with measure `μ`; `ι` is a finite type of
 
 ### 1.2 Holm (S1)
 
-For `α ≥ 0`, every `I₀ : Finset ι` (the true nulls) and every family `p : ι → Ω → ℝ` whose
+For every `α : ℝ`, every `I₀ : Finset ι` (the true nulls) and every family `p : ι → Ω → ℝ` whose
 null coordinates are valid p-values:
 
     μ {ω | ∃ i ∈ I₀, HolmRejects α (p · ω) i} ≤ α                 (holm_fwer_le)
 
 No assumption is made on the joint law of `p`, on the non-null coordinates, or on
 measurability. Bonferroni (`p i ≤ α / m`) is a corollary (`bonferroni_fwer_le`), because
-Bonferroni's rejections are a subset of Holm's (`BonferroniRejects.holmRejects`).
+Bonferroni's rejections are a subset of Holm's for `α ≥ 0` (`BonferroniRejects.holmRejects`).
+Since `I₀` is arbitrary this is strong FWER control. For `α < 0` both procedures reject only
+p-values `≤ 0`, and `measure_exists_le_zero` shows that no null p-value is `≤ 0` except on a
+null set.
 
 **Definition.** `HolmRejects α p i :⇔ ∀ j, p j ≤ p i → p j ≤ α / #{k | p j ≤ p k}`.
 
@@ -58,10 +61,18 @@ For every `n`, `α` and `p ∈ I`:
 **Faithfulness.** The tails are the textbook sums (`binomial_real_Iic`,
 `binomial_real_Ici`). The closed forms `cpUpper n α 0 = 1 - (α/2)^(1/n)` and
 `cpLower n α n = (α/2)^(1/n)` (for `n ≥ 1`, `0 ≤ α ≤ 2`) match the standard formulas, and
-`cpLower n α 0 = 0`, `cpUpper n α n = 1` for `α ≤ 2`. The inf/sup form equals the root form
-"`P_θ(X ≥ x) = α/2`" (and hence the Beta-quantile form) because `θ ↦ P_θ(X ≥ x)` is continuous
-and increasing. That equivalence is not formalised. It does not affect the coverage theorem,
-which holds for the endpoints exactly as defined.
+`cpLower n α 0 = 0`, `cpUpper n α n = 1` for `α ≤ 2`. For interior observations the tails are
+continuous in `θ` (`continuous_binomial_real_Ici`, `continuous_binomial_real_Iic`), which
+alone gives the root form: for `1 ≤ x ≤ n` and `0 < α ≤ 2`, `P_θ(X ≥ x) = α/2` at
+`θ = cpLower n α x` and `< α/2` below it (`binomial_real_Ici_cpLower`,
+`binomial_real_Ici_lt_of_lt_cpLower`), and symmetrically for `cpUpper` when `x < n`. The
+accepted set is closed, so its infimum is accepted; the tail vanishes at `θ = 0`, so the
+infimum is positive, and continuity from the left forces equality. For `α ≤ 1` the interval is
+non-empty (`cpLower_le_cpUpper`: between the endpoints both tails would be `< α/2`, but they
+sum to at least 1). Monotonicity of the tail, which makes the root unique and gives the
+Beta-quantile form, is not formalised. None of this affects the coverage theorem, which holds
+for the endpoints exactly as defined (and would hold for any wider interval, which is why
+these characterisations matter).
 
 **Proof of S2.** If `p < cpLower n α x` then `p` is not in the set whose infimum is
 `cpLower`, so `P_p(X ≥ x) < α/2`; symmetrically for the upper bound. So the miss event is
@@ -83,6 +94,11 @@ For a non-negative supermartingale `M` with respect to a filtration on `ℕ`, a 
     ε · μ {ω | ∃ k ≤ n, ε ≤ M k ω} ≤ E[M 0]      (Supermartingale.mul_measure_exists_le_le)
     ε · μ {ω | ∃ k, ε ≤ M k ω} ≤ E[M 0]          (Supermartingale.mul_measure_exists_le)
     μ {ω | ∃ k, ε ≤ M k ω} ≤ E[M 0] / ε  (ε ≠ 0) (Supermartingale.measure_exists_le_le_div)
+    ε · μ {ω | ε ≤ ⨆ k, M k ω} ≤ E[M 0]          (Supermartingale.mul_measure_le_iSup)
+
+The supremum is taken in `[0, ∞]` (of `ENNReal.ofReal (M k ω)`); a real-valued `⨆` would be
+`0` on unbounded paths. Its event is larger than `{∃ k, ε ≤ M k}` and follows from it by
+applying the `∃` form at every `ε' < ε`.
 
 **Proof.** Let `τ` be the first time in `[0, n]` with `M ≥ ε` (`hittingBtwn`, a bounded
 stopping time). Then `ε · 1_A ≤ M_τ` pointwise (non-negativity off `A`), and optional
@@ -130,8 +146,8 @@ by continuity from below.
 
 ## 4. Out of scope (v0.1)
 
-- Monotonicity of binomial tails in `θ`, the root/Beta-quantile characterisation of the
-  Clopper–Pearson endpoints, and exactness of the closed interval at the endpoints.
+- Monotonicity of binomial tails in `θ`, uniqueness of the endpoint roots and the
+  Beta-quantile form, and exactness of the closed interval at the endpoints.
 - Holm's procedure via closed testing, weighted Holm, Hochberg/Hommel (which need dependence
   assumptions), and FDR procedures (Benjamini–Hochberg).
 - Continuous-time Ville and e-process generalisations.

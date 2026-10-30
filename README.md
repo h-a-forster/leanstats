@@ -4,14 +4,14 @@ Machine-checked proofs, in Lean 4 with mathlib, of three guarantees that applied
 relies on:
 
 1. **Holm's step-down procedure controls the family-wise error rate** at level `α` for a
-   finite family of hypotheses under arbitrary dependence between the p-values. Bonferroni
-   follows as a corollary.
+   finite family of hypotheses under arbitrary dependence between the p-values, whatever the
+   set of true nulls (strong control). Bonferroni follows as a corollary.
 2. **Clopper–Pearson intervals have coverage at least `1 - α`** for every success probability
    `p ∈ [0, 1]` and every number of trials `n`.
 3. **Ville's inequality**: a non-negative supermartingale exceeds `ε` at any time with
    probability at most `E[M₀] / ε`.
 
-There is no `sorry`, `admit` or new `axiom`. The main theorems depend only on Lean's three
+There is no `sorry`, `admit` or new `axiom`. Every declaration depends only on Lean's three
 standard axioms (`propext`, `Classical.choice`, `Quot.sound`). `LeanStatsTest/Axioms.lean`
 checks this on every build.
 
@@ -37,7 +37,7 @@ def HolmRejects (α : ℝ) (p : ι → ℝ) (i : ι) : Prop :=
   ∀ j, p j ≤ p i → p j ≤ α / #{k | p j ≤ p k}
 
 theorem holm_fwer_le (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι → Ω → ℝ}
-    {I₀ : Finset ι} (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) {α : ℝ} (hα : 0 ≤ α) :
+    {I₀ : Finset ι} (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) (α : ℝ) :
     μ {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i} ≤ ENNReal.ofReal α
 
 theorem bonferroni_fwer_le ... :
@@ -46,7 +46,9 @@ theorem bonferroni_fwer_le ... :
 
 `ι` is any finite type of hypotheses and `I₀` is the (unknown) set of true nulls. Only the
 null p-values need to be valid; their joint law, and everything about the non-null p-values,
-is arbitrary.
+is arbitrary. Because the bound holds for every `I₀`, this is strong control of the FWER. The
+level `α` may be any real number (for `α < 0` both procedures reject only p-values `≤ 0`, an
+event of probability zero).
 
 `HolmRejects` describes Holm's procedure without a sorting permutation. Theorem
 `holmRejects_iff_stepDownRejects` proves that it agrees with the textbook procedure ("sort
@@ -78,7 +80,12 @@ theorem HasLaw.one_sub_le_clopperPearson (hX : HasLaw X Bin(n, p) P) (hα : 0 �
 The supporting lemmas `binomial_real_Iic` and `binomial_real_Ici` give the tails as the
 familiar finite sums. `coe_cpUpper_zero` and `coe_cpLower_self` give the closed forms
 `1 - (α/2)^(1/n)` for zero successes and `(α/2)^(1/n)` for `n` successes.
-`LeanStatsTest/Examples.lean` checks concrete values.
+For interior observations, `binomial_real_Ici_cpLower` (`1 ≤ x ≤ n`) and
+`binomial_real_Iic_cpUpper` (`x < n`) show that the endpoints solve the textbook equations
+`P_θ(X ≥ x) = α/2` and `P_θ(X ≤ x) = α/2` for `0 < α ≤ 2`, and that the tail is strictly
+smaller beyond them, and `cpLower_le_cpUpper` shows that the interval is non-empty for
+`α ≤ 1`. `LeanStatsTest/Examples.lean` checks concrete values, including
+`cpUpper 2 α 1 = √(1 - α/2)` computed from the definition.
 
 The probabilistic core is `measure_setOf_measure_Iic_le`: for any measure on a countable
 linear order, `ν {x | ν (Iic x) ≤ t} ≤ t`. In words, the distribution function evaluated at
@@ -92,16 +99,18 @@ theorem Supermartingale.mul_measure_exists_le [IsFiniteMeasure μ]
     ε * μ {ω | ∃ k, (ε : ℝ) ≤ M k ω} ≤ ENNReal.ofReal (μ[M 0])
 ```
 
-with a finite-horizon version and a divided form `μ {∃ k, ε ≤ M k} ≤ E[M 0] / ε`.
+with a finite-horizon version, a divided form `μ {∃ k, ε ≤ M k} ≤ E[M 0] / ε`, and the
+supremum form `ε * μ {ε ≤ sup_k M k} ≤ E[M 0]` (`Supermartingale.mul_measure_le_iSup`, supremum
+in `[0, ∞]`), whose event also contains paths that approach `ε` without reaching it.
 
 ## Modelling choices
 
 | Choice | Why |
 |---|---|
-| p-values are real random variables with `μ {p ≤ t} ≤ t` on `[0, 1]` | Standard definition. It covers discrete tests, and the bound is stated with the outer measure, so measurability is never needed. |
+| p-values are real random variables with `μ {p ≤ t} ≤ t` on `[0, 1]` | Standard definition. It covers discrete tests. For measurable `p` it is the usual definition; for non-measurable `p`, `μ` is the outer measure, so the hypothesis and the conclusions are outer-measure bounds and measurability is never needed. |
 | Holm is defined sort-free and proved equal to the sorted procedure | The sort-free form makes the FWER proof short. The equivalence theorem shows it is the textbook procedure. |
 | The true nulls `I₀` are a fixed `Finset` | This is the frequentist set-up: the truth is fixed and unknown. The theorem holds for every `I₀`. |
-| Clopper–Pearson endpoints are the inf/sup of the accepted parameters | Equivalent to "solve `P_θ(X ≥ x) = α/2`" or Beta quantiles because the binomial tail is monotone in `θ`. That monotonicity is not needed for coverage and is not formalised (see AGENTS.md). |
+| Clopper–Pearson endpoints are the inf/sup of the accepted parameters | Continuity of the tail in `θ` makes them the smallest (largest) root of `P_θ(X ≥ x) = α/2` (`P_θ(X ≤ x) = α/2`), which is proved. Monotonicity, which makes the root unique and gives the Beta-quantile form, is not needed for coverage and is not formalised (see AGENTS.md). |
 | Endpoints live in `unitInterval` | `unitInterval` is a complete lattice, so the endpoints always exist with no side conditions. |
 | Probabilities are in `ℝ≥0∞` (miss probability) and `ℝ` (coverage) | The `ℝ≥0∞` statement holds for every `α`. The coverage form needs `0 ≤ α`. |
 
