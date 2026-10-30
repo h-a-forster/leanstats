@@ -1,0 +1,30 @@
+name: CI
+
+# No push trigger: Actions minutes are metered on private repositories.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: lake build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: No sorry, admit or axiom declarations
+        run: sh scripts/check_no_sorry.sh
+
+      # Installs the pinned toolchain, fetches the mathlib cache and runs `lake build`, which
+      # also builds LeanStatsTest (worked examples and the axiom audit of the main theorems).
+      - uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6 # v1.6.2
+        with:
+          build-args: "--wfail"
