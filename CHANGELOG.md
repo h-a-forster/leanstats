@@ -39,6 +39,6 @@ Not tagged yet: the tag follows the first green CI run on GitHub.
 - Checks: an axiom audit of every declaration made in a `LeanStats` module, which also requires
   the main theorems by name (`LeanStatsTest/Axioms.lean`); a source scan
   (`scripts/check_no_sorry.sh`) rejecting `sorry`, `admit`, `native_decide`, `axiom`
-  declarations, kernel bypasses, environment edits, `initialize` code, `debug` options in
+  declarations, kernel bypasses, `setEnv`/`addConstAsync` environment edits, `initialize` code, `debug` options in
   `lakefile.toml` and a `lakefile.lean`, with a self-test (`scripts/test_check_no_sorry.sh`);
   CI with the official `lean-action`, `--wfail` and a leanchecker kernel replay.

@@ -113,8 +113,8 @@ A third pass handled the review findings that the earlier follow-ups had not rea
   equations; new example `cpLower 2 0.05 1 = 1 - √0.975`.
 - The distribution-function lemma holds for any measure on `ℝ` (`measure_cdf_le`).
 - `holm_fwer_le_real`: the Holm bound as a real probability.
-- The axiom sweep covers every declaration made in a `LeanStats` module, not only those in the
-  namespace. The source scan rejects `setEnv`, `addConstAsync`, `initialize`, a
+- The axiom sweep covers every public declaration made in a `LeanStats` module, not only those
+  in the namespace (private declarations are checked through the public theorems that use them). The source scan rejects `setEnv`, `addConstAsync`, `initialize`, a
   `[leanOptions.debug]` table and a `lakefile.lean`, and a self-test checks every pattern.
 - Documentation: `α ≥ 0` for the step-down equivalence in this report and docs/PR.md; DESIGN
   edge cases; machine-specific wording; 0.1.0 marked as not yet tagged; private reporting.

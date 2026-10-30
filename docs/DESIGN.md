@@ -123,9 +123,10 @@ by continuity from below.
   proof to a dozen lines and moves the bookkeeping into a separate equivalence theorem.
 - **Endpoints in `unitInterval`.** With `ℝ`-valued `sInf`/`sSup` the empty-set and
   unboundedness conventions (`sInf ∅ = 0`) would need side conditions; `unitInterval` is a
-  complete linear order, so `sInf_le`/`le_sSup` apply directly. An empty accepted set (for
-  `α > 2`, or for `x > n`, an event of probability zero) gives the empty interval, which is the
-  right convention.
+  complete linear order, so `sInf_le`/`le_sSup` apply directly. Only `α > 2` empties both
+  accepted sets and gives the empty interval. For `x > n` (an event of probability zero) and
+  `α > 0` the lower set is empty, so `cpLower = 1` and the interval is `{1}` when `α ≤ 2`
+  (`[0, 1]` when `α ≤ 0`).
 - **Level convention.** Each tail gets `α/2` (the equal-tailed Clopper–Pearson interval).
   The miss bound `≤ α` holds for every `α`; the coverage form `≥ 1 - α` needs `α ≥ 0`, and
   for `α ≥ 1` it is trivial.

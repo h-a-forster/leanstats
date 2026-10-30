@@ -20,7 +20,7 @@ and no data.
   `LeanStats`. MIT header with `Authors: leanstats contributors` (the header linter is
   configured for MIT in `lakefile.toml`).
 - No `sorry`, `admit`, `native_decide`, `axiom` or kernel bypass (`scripts/check_no_sorry.sh`).
-  `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every declaration; add every
+  `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every public declaration; add every
   new main theorem to the names it lists. Run the leanchecker replay locally before pushing
   (CI has not run yet).
 - Every new definition gets evidence that it is faithful: a characterisation theorem, a
@@ -28,7 +28,7 @@ and no data.
 - mathlib style and naming. `lake build --wfail` must pass with the standard linter set.
   Search mathlib (`exact?`, Loogle, the docs) before writing a helper lemma.
 - CI (`.github/workflows/ci.yml`) runs on pull requests and manual dispatch only (metered
-  private minutes): the source scan, then `leanprover/lean-action` (pinned by SHA) with
+  private minutes): the source scan and its self-test, then `leanprover/lean-action` (pinned by SHA) with
   `--wfail` and a leanchecker replay (`LEAN_NUM_THREADS=1`, modules passed explicitly).
 - Scratch files go in `tmp/` (gitignored). Commits end with
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. No personal names, local paths or
@@ -44,7 +44,7 @@ and no data.
 | `LeanStats/ClopperPearson.lean` | super-uniform distribution function (countable orders and `ℝ`), binomial tails, `cpLower`/`cpUpper`/`clopperPearson`, coverage, boundary values, closed forms, monotone tails, endpoints as unique roots of the tail equations |
 | `LeanStats/Ville.lean` | finite- and infinite-horizon Ville inequality, `∃` and `sup` forms |
 | `LeanStatsTest/Examples.lean` | worked examples pinning down the definitions |
-| `LeanStatsTest/Axioms.lean` | axiom audit of every declaration in the `LeanStats` modules, plus the main theorems by name |
+| `LeanStatsTest/Axioms.lean` | axiom audit of every public declaration in the `LeanStats` modules, plus the main theorems by name |
 | `scripts/check_no_sorry.sh` | source scan used by CI; `scripts/test_check_no_sorry.sh` plants each pattern and checks the scan rejects it |
 | `docs/PR.md` | mathlib upstreaming plan and renames |
 

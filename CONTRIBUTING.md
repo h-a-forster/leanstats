@@ -21,8 +21,8 @@ that is at least a week old.
 ## Rules for proofs
 
 - No `sorry`, `admit`, new `axiom`, `native_decide` or kernel bypass in `LeanStats/` or
-  `LeanStatsTest/`. `LeanStatsTest/Axioms.lean` audits every declaration in the `LeanStats`
-  modules; add a new main theorem to the names listed after `#audit_leanstats_axioms`.
+  `LeanStatsTest/`. `LeanStatsTest/Axioms.lean` audits every public declaration in the `LeanStats`
+  modules (private ones only through the public theorems that use them); add a new main theorem to the names listed after `#audit_leanstats_axioms`.
 - mathlib style: naming conventions, a module docstring with "Main statements", a docstring on
   every definition and main theorem, lines at most 100 characters. The build enables mathlib's
   standard linter set and CI treats warnings as errors.
