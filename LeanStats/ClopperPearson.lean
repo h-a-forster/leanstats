@@ -8,6 +8,11 @@ module
 public import Mathlib.Probability.Distributions.Binomial
 public import Mathlib.Probability.HasLaw
 public import Mathlib.Order.CompleteLatticeIntervals
+public import Mathlib.Probability.CDF
+public import Mathlib.RingTheory.Polynomial.Bernstein
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Topology.Algebra.Polynomial
 
 /-!
 # Coverage of the Clopper–Pearson interval
@@ -22,11 +27,13 @@ one-sided binomial tests of size `α / 2`:
 
 The tails are continuous in `θ`, so for `1 ≤ x ≤ n` and `0 < α ≤ 2` the lower bound is the
 smallest root of `P_θ(X ≥ x) = α / 2`: the tail equals `α / 2` there and is smaller for every
-smaller `θ`. The same holds for the upper bound and `P_θ(X ≤ x)` when `x < n`. The tails are
-also increasing (resp. decreasing), which makes the root unique and equal to the `α / 2`
-quantile of `Beta(x, n - x + 1)`; that last step is not formalised here. The coverage proof
-does not depend on how the endpoints are computed, only on the fact that they bound the
-accepted parameters.
+smaller `θ`. The same holds for the upper bound and `P_θ(X ≤ x)` when `x < n`. The upper tail
+is strictly increasing in `θ` (its derivative is `n · B_{n-1,x-1}(θ)`, a Bernstein polynomial)
+and the lower tail strictly decreasing, so each endpoint is the unique root of its equation,
+which is the textbook definition (equivalently, the `α / 2` quantile of `Beta(x, n - x + 1)`;
+the identification with the Beta distribution is not formalised). The coverage proof does not
+depend on how the endpoints are computed, only on the fact that they bound the accepted
+parameters.
 
 The bounds take values in `unitInterval`, which is a complete lattice, so the infimum and
 supremum always exist. The interval is the closed interval `Set.Icc (cpLower n α x)
@@ -36,7 +43,9 @@ supremum always exist. The interval is the closed interval `Set.Icc (cpLower n �
 
 * `LeanStats.measure_setOf_measure_Iic_le` and `LeanStats.measure_setOf_measure_Ici_le`: for
   any measure `ν` on a countable linear order, `ν {x | ν (Iic x) ≤ t} ≤ t` (the distribution
-  function evaluated at the observation is super-uniform), and the same for upper tails.
+  function evaluated at the observation is super-uniform), and the same for upper tails;
+  `LeanStats.measure_setOf_measure_Iic_le_real` and `LeanStats.measure_cdf_le` are the versions
+  for any measure on `ℝ`, the latter in the form `P(F(X) ≤ t) ≤ t` with `cdf`.
 * `LeanStats.binomial_clopperPearson_not_mem_le`: for every `p ∈ [0, 1]`, the interval misses
   `p` with probability at most `α`.
 * `LeanStats.one_sub_le_binomial_clopperPearson`: coverage is at least `1 - α`, for every `n`
@@ -46,6 +55,9 @@ supremum always exist. The interval is the closed interval `Set.Icc (cpLower n �
 * `LeanStats.binomial_real_Ici_cpLower` and `LeanStats.binomial_real_Iic_cpUpper`: the
   endpoints solve the tail equations `P_θ(X ≥ x) = α / 2` and `P_θ(X ≤ x) = α / 2`.
 * `LeanStats.cpLower_le_cpUpper`: for `α ≤ 1` the interval is non-empty.
+* `LeanStats.strictMono_binomial_real_Ici`, `LeanStats.binomial_real_Ici_eq_iff` and
+  `LeanStats.binomial_real_Iic_eq_iff`: the tails are strictly monotone in `θ`, so the
+  endpoints are the unique roots of the tail equations.
 
 ## References
 
@@ -92,6 +104,73 @@ theorem measure_setOf_measure_Ici_le (ν : Measure β) (t : ℝ≥0∞) :
     _ ≤ t := iSup₂_le fun _ hx ↦ hx
 
 end Tail
+
+/-- For any measure `ν` on `ℝ`, `ν {x | ν (Iic x) ≤ t} ≤ t`. The set of such `x` is covered by
+countably many of its own `Iic x` (its rational points and its maximum, if any). -/
+theorem measure_setOf_measure_Iic_le_real (ν : Measure ℝ) (t : ℝ≥0∞) :
+    ν {x | ν (Iic x) ≤ t} ≤ t := by
+  set A := {x | ν (Iic x) ≤ t}
+  set D := ((↑) '' {q : ℚ | (q : ℝ) ∈ A}) ∪ {x | IsGreatest A x}
+  have hS : {x | IsGreatest A x}.Subsingleton := fun _ ha _ hb ↦ ha.unique hb
+  have hD : D.Countable := ((Set.to_countable _).image _).union hS.countable
+  have hDA : D ⊆ A := by
+    rintro _ (⟨q, hq, rfl⟩ | h)
+    exacts [hq, h.1]
+  have hd : DirectedOn ((· ⊆ ·) on Iic) D := by
+    intro x hx y hy
+    rcases le_total x y with h | h
+    · exact ⟨y, hy, Iic_subset_Iic.2 h, subset_rfl⟩
+    · exact ⟨x, hx, subset_rfl, Iic_subset_Iic.2 h⟩
+  have hcov : A ⊆ ⋃ x ∈ D, Iic x := by
+    intro x hx
+    by_cases h : IsGreatest A x
+    · exact mem_biUnion (Or.inr h) (mem_Iic.2 le_rfl)
+    obtain ⟨y, hy, hxy⟩ : ∃ y ∈ A, x < y := by
+      simpa [IsGreatest, hx, upperBounds] using h
+    obtain ⟨q, hxq, hqy⟩ := exists_rat_btwn hxy
+    exact mem_biUnion (Or.inl ⟨q, (measure_mono (Iic_subset_Iic.2 hqy.le)).trans hy, rfl⟩)
+      (mem_Iic.2 hxq.le)
+  calc ν A ≤ ν (⋃ x ∈ D, Iic x) := measure_mono hcov
+    _ = ⨆ x ∈ D, ν (Iic x) := measure_biUnion_eq_iSup hD hd
+    _ ≤ t := iSup₂_le fun _ hx ↦ hDA hx
+
+/-- For any measure `ν` on `ℝ`, `ν {x | ν (Ici x) ≤ t} ≤ t`. -/
+theorem measure_setOf_measure_Ici_le_real (ν : Measure ℝ) (t : ℝ≥0∞) :
+    ν {x | ν (Ici x) ≤ t} ≤ t := by
+  set A := {x | ν (Ici x) ≤ t}
+  set D := ((↑) '' {q : ℚ | (q : ℝ) ∈ A}) ∪ {x | IsLeast A x}
+  have hS : {x | IsLeast A x}.Subsingleton := fun _ ha _ hb ↦ ha.unique hb
+  have hD : D.Countable := ((Set.to_countable _).image _).union hS.countable
+  have hDA : D ⊆ A := by
+    rintro _ (⟨q, hq, rfl⟩ | h)
+    exacts [hq, h.1]
+  have hd : DirectedOn ((· ⊆ ·) on Ici) D := by
+    intro x hx y hy
+    rcases le_total x y with h | h
+    · exact ⟨x, hx, subset_rfl, Ici_subset_Ici.2 h⟩
+    · exact ⟨y, hy, Ici_subset_Ici.2 h, subset_rfl⟩
+  have hcov : A ⊆ ⋃ x ∈ D, Ici x := by
+    intro x hx
+    by_cases h : IsLeast A x
+    · exact mem_biUnion (Or.inr h) (mem_Ici.2 le_rfl)
+    obtain ⟨y, hy, hyx⟩ : ∃ y ∈ A, y < x := by
+      simpa [IsLeast, hx, lowerBounds] using h
+    obtain ⟨q, hyq, hqx⟩ := exists_rat_btwn hyx
+    exact mem_biUnion (Or.inl ⟨q, (measure_mono (Ici_subset_Ici.2 hyq.le)).trans hy, rfl⟩)
+      (mem_Ici.2 hqx.le)
+  calc ν A ≤ ν (⋃ x ∈ D, Ici x) := measure_mono hcov
+    _ = ⨆ x ∈ D, ν (Ici x) := measure_biUnion_eq_iSup hD hd
+    _ ≤ t := iSup₂_le fun _ hx ↦ hDA hx
+
+/-- **The distribution function is super-uniform.** If `F` is the distribution function of a
+real random variable `X`, then `P(F(X) ≤ t) ≤ t` for every `t ≥ 0`. -/
+theorem measure_cdf_le (ν : Measure ℝ) [IsProbabilityMeasure ν] {t : ℝ} (ht : 0 ≤ t) :
+    ν {x | cdf ν x ≤ t} ≤ ENNReal.ofReal t := by
+  have h : {x | cdf ν x ≤ t} = {x | ν (Iic x) ≤ ENNReal.ofReal t} := by
+    ext x
+    simp only [mem_ofPred_eq, ← ofReal_cdf, ENNReal.ofReal_le_ofReal_iff ht]
+  rw [h]
+  exact measure_setOf_measure_Iic_le_real ν _
 
 /-- The Clopper–Pearson lower confidence bound at level `α` after observing `x` successes in
 `n` trials: the infimum of the `θ ∈ [0, 1]` with `P_θ(X ≥ x) ≥ α / 2`, `X ~ Bin(n, θ)`. -/
@@ -337,5 +416,74 @@ theorem cpLower_le_cpUpper (n : ℕ) {α : ℝ} (hα : α ≤ 1) (x : ℕ) :
     rw [← probReal_univ (μ := Bin(n, θ)), ← Iic_union_Ici (a := x)]
     exact measureReal_union_le _ _
   linarith [binomial_real_Ici_lt_of_lt_cpLower hl, binomial_real_Iic_lt_of_cpUpper_lt hu]
+
+/-! ### Monotone tails and unique roots
+
+The upper tail is a sum of Bernstein polynomials whose derivative telescopes to
+`n · B_{n-1,x-1}`, positive on `(0, 1)`. -/
+
+/-- The upper tail as a sum of Bernstein polynomials. -/
+theorem binomial_real_Ici_eq_eval (n x : ℕ) (θ : I) :
+    Bin(n, θ).real (Ici x) =
+      (∑ k ∈ Finset.Icc x n, bernsteinPolynomial ℝ n k).eval (θ : ℝ) := by
+  simp [binomial_real_Ici, bernsteinPolynomial, Polynomial.eval_finsetSum]
+
+/-- The derivative of the upper-tail polynomial telescopes to a single Bernstein polynomial. -/
+theorem derivative_sum_bernstein {n y : ℕ} (hy : y < n) :
+    Polynomial.derivative (∑ k ∈ Finset.Icc (y + 1) n, bernsteinPolynomial ℝ n k) =
+      n * bernsteinPolynomial ℝ (n - 1) y := by
+  rw [Polynomial.derivative_sum,
+    show Finset.Icc (y + 1) n = Finset.Ico (y + 1) (n + 1) by ext; simp,
+    Finset.sum_Ico_eq_sum_range]
+  simp_rw [show ∀ k, y + 1 + k = (y + k) + 1 by omega, bernsteinPolynomial.derivative_succ]
+  have h := Finset.sum_range_sub' (fun i ↦ bernsteinPolynomial ℝ (n - 1) (y + i)) (n + 1 - (y + 1))
+  simp only [← add_assoc, add_zero, show y + (n + 1 - (y + 1)) = n by omega] at h
+  rw [← Finset.mul_sum, h, bernsteinPolynomial.eq_zero_of_lt ℝ (show n - 1 < n by omega),
+    sub_zero]
+
+/-- For `1 ≤ x ≤ n` the upper tail `θ ↦ P_θ(X ≥ x)` is strictly increasing. -/
+theorem strictMono_binomial_real_Ici {n x : ℕ} (hx : 1 ≤ x) (hxn : x ≤ n) :
+    StrictMono fun θ : I ↦ Bin(n, θ).real (Ici x) := by
+  obtain ⟨y, rfl⟩ : ∃ y, x = y + 1 := ⟨x - 1, by omega⟩
+  set P := ∑ k ∈ Finset.Icc (y + 1) n, bernsteinPolynomial ℝ n k
+  have hmono : StrictMonoOn (fun t : ℝ ↦ P.eval t) (Icc 0 1) := by
+    refine strictMonoOn_of_deriv_pos (convex_Icc 0 1) P.continuousOn fun t ht ↦ ?_
+    rw [interior_Icc] at ht
+    rw [Polynomial.deriv, derivative_sum_bernstein (by omega)]
+    simp only [bernsteinPolynomial, Polynomial.eval_mul, Polynomial.eval_natCast,
+      Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_sub, Polynomial.eval_one]
+    have : (0 : ℝ) < (n - 1).choose y := Nat.cast_pos.2 (Nat.choose_pos (by omega))
+    have : (0 : ℝ) < n := Nat.cast_pos.2 (by omega)
+    have := ht.1; have := ht.2
+    positivity
+  intro a b hab
+  simp only [binomial_real_Ici_eq_eval]
+  exact hmono a.2 b.2 hab
+
+/-- For `x < n` the lower tail `θ ↦ P_θ(X ≤ x)` is strictly decreasing. -/
+theorem strictAnti_binomial_real_Iic {n x : ℕ} (hxn : x < n) :
+    StrictAnti fun θ : I ↦ Bin(n, θ).real (Iic x) := by
+  have h (θ : I) : Bin(n, θ).real (Iic x) = 1 - Bin(n, θ).real (Ici (x + 1)) := by
+    rw [← probReal_compl_eq_one_sub .of_discrete]
+    congr 1
+    ext k
+    simp
+  intro a b hab
+  simp only [h]
+  linarith [strictMono_binomial_real_Ici (n := n) (x := x + 1) (by omega) hxn hab]
+
+/-- **The lower bound is the unique root.** For `1 ≤ x ≤ n` and `0 < α ≤ 2`,
+`P_θ(X ≥ x) = α / 2` iff `θ = cpLower n α x`. -/
+theorem binomial_real_Ici_eq_iff {n x : ℕ} (hx : 1 ≤ x) (hxn : x ≤ n) {α : ℝ} (hα₀ : 0 < α)
+    (hα₂ : α ≤ 2) {θ : I} : Bin(n, θ).real (Ici x) = α / 2 ↔ θ = cpLower n α x := by
+  rw [← binomial_real_Ici_cpLower hx hxn hα₀ hα₂]
+  exact ⟨fun h ↦ (strictMono_binomial_real_Ici hx hxn).injective h, fun h ↦ h ▸ rfl⟩
+
+/-- **The upper bound is the unique root.** For `x < n` and `0 < α ≤ 2`,
+`P_θ(X ≤ x) = α / 2` iff `θ = cpUpper n α x`. -/
+theorem binomial_real_Iic_eq_iff {n x : ℕ} (hxn : x < n) {α : ℝ} (hα₀ : 0 < α)
+    (hα₂ : α ≤ 2) {θ : I} : Bin(n, θ).real (Iic x) = α / 2 ↔ θ = cpUpper n α x := by
+  rw [← binomial_real_Iic_cpUpper hxn hα₀ hα₂]
+  exact ⟨fun h ↦ (strictAnti_binomial_real_Iic hxn).injective h, fun h ↦ h ▸ rfl⟩
 
 end LeanStats

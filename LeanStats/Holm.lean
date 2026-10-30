@@ -38,6 +38,7 @@ can differ, but both reject only p-values `≤ 0`.
   procedure rejects at least one true null with probability at most `α`, whatever the joint
   dependence between the p-values (strong FWER control).
 * `LeanStats.bonferroni_fwer_le`: the same for Bonferroni, as a corollary.
+* `LeanStats.holm_fwer_le_real`: the bound for Holm as a real probability, for `0 ≤ α`.
 
 ## References
 
@@ -163,5 +164,12 @@ theorem bonferroni_fwer_le (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι �
   exact (measure_mono (fun _ ⟨i, hi, h⟩ ↦ ⟨i, hi, h.holmRejects hα⟩ :
     {ω | ∃ i ∈ I₀, BonferroniRejects α (fun j ↦ p j ω) i} ⊆
       {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i})).trans (holm_fwer_le μ hp α)
+
+/-- `holm_fwer_le` with the probability as a real number, for `0 ≤ α`. No measurability is
+needed: for measurable p-values `μ.real` is the usual probability of the event. -/
+theorem holm_fwer_le_real (μ : Measure Ω) [IsProbabilityMeasure μ] {p : ι → Ω → ℝ}
+    {I₀ : Finset ι} (hp : ∀ i ∈ I₀, IsValidPValue μ (p i)) {α : ℝ} (hα : 0 ≤ α) :
+    μ.real {ω | ∃ i ∈ I₀, HolmRejects α (fun j ↦ p j ω) i} ≤ α :=
+  ENNReal.toReal_le_of_le_ofReal hα (holm_fwer_le μ hp α)
 
 end LeanStats

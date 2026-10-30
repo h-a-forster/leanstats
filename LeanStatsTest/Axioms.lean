@@ -43,6 +43,7 @@ elab "#audit_leanstats_axioms" required:(ppSpace ident)* : command => do
 
 #audit_leanstats_axioms
   LeanStats.holm_fwer_le
+  LeanStats.holm_fwer_le_real
   LeanStats.bonferroni_fwer_le
   LeanStats.holmRejects_iff_stepDownRejects
   LeanStats.binomial_clopperPearson_not_mem_le
@@ -50,6 +51,9 @@ elab "#audit_leanstats_axioms" required:(ppSpace ident)* : command => do
   LeanStats.HasLaw.one_sub_le_clopperPearson
   LeanStats.coe_cpUpper_zero
   LeanStats.coe_cpLower_self
+  LeanStats.binomial_real_Ici_eq_iff
+  LeanStats.binomial_real_Iic_eq_iff
+  LeanStats.measure_cdf_le
   LeanStats.Supermartingale.mul_measure_exists_le_le
   LeanStats.Supermartingale.mul_measure_exists_le
   LeanStats.Supermartingale.measure_exists_le_le_div

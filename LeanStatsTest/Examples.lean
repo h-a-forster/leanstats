@@ -142,4 +142,18 @@ example : Bin(2, cpLower 2 0.05 1).real (Set.Ici 1) = 0.025 := by
   rw [binomial_real_Ici_cpLower le_rfl (by norm_num) (by norm_num) (by norm_num)]
   norm_num
 
+/-- The lower bound at an interior observation, from uniqueness of the root:
+`P_θ(X ≥ 1) = 1 - (1 - θ)² = 0.025` at `θ = 1 - √0.975`. -/
+example : (cpLower 2 0.05 1 : ℝ) = 1 - √0.975 := by
+  have h1 : √(0.975 : ℝ) ≤ 1 := Real.sqrt_le_one.2 (by norm_num)
+  have h2 : √(0.975 : ℝ) ^ 2 = 0.975 := Real.sq_sqrt (by norm_num)
+  set θ : unitInterval := ⟨1 - √0.975, sub_nonneg.2 h1, by linarith [Real.sqrt_nonneg (0.975 : ℝ)]⟩
+  have : Bin(2, θ).real (Set.Ici 1) = 0.05 / 2 := by
+    rw [binomial_real_Ici, show Finset.Icc 1 2 = {1, 2} by decide, Finset.sum_pair (by norm_num)]
+    simp only [θ]
+    generalize √(0.975 : ℝ) = s at h2
+    norm_num
+    linear_combination -h2
+  rw [← (binomial_real_Ici_eq_iff le_rfl (by norm_num) (by norm_num) (by norm_num)).1 this]
+
 end LeanStatsTest
