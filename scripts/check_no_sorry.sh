@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 # Fail if any Lean source contains `sorry`, `admit`, `native_decide`, an `axiom` declaration, or
 # a way around the kernel (`debug.skipKernelTC`, `implemented_by`, `extern`, `unsafe`,
-# `ofReduceBool`, `sorryAx`, adding declarations unchecked or editing the environment from a
-# command), and fail if `lakefile.toml` sets a `debug.` option. `lake build` additionally audits
+# `ofReduceBool`, `sorryAx`, adding declarations unchecked, editing the environment from a
+# command or running `initialize` code), fail if `lakefile.toml` mentions a `debug` option, and
+# fail if there is a `lakefile.lean` (which runs arbitrary code). scripts/test_check_no_sorry.sh
+# checks that each pattern is rejected. `lake build` additionally audits
 # the axioms of every declaration (LeanStatsTest/Axioms.lean), and CI replays the environment
 # through the kernel (leanchecker).
 set -eu
@@ -17,12 +19,16 @@ if grep -nE '^[[:space:]]*(@\[[^]]*\][[:space:]]*)?((private|protected|public|no
   echo "error: axiom declaration found" >&2
   status=1
 fi
-if grep -nwE 'skipKernelTC|implemented_by|extern|unsafe|ofReduceBool|sorryAx|addDeclWithoutChecking|addDeclCore|modifyEnv|run_cmd|run_elab|run_meta' $files; then
+if grep -nwE 'skipKernelTC|implemented_by|extern|unsafe|ofReduceBool|sorryAx|addDeclWithoutChecking|addDeclCore|addConstAsync|modifyEnv|setEnv|run_cmd|run_elab|run_meta|initialize|builtin_initialize' $files; then
   echo "error: kernel bypass or environment edit found" >&2
   status=1
 fi
-if grep -nE 'debug\.|skipKernelTC' lakefile.toml; then
+if grep -nE 'debug|skipKernelTC' lakefile.toml; then
   echo "error: debug option in lakefile.toml" >&2
+  status=1
+fi
+if [ -e lakefile.lean ]; then
+  echo "error: lakefile.lean found (use lakefile.toml)" >&2
   status=1
 fi
 [ "$status" -eq 0 ] && echo "ok: no sorry, admit, native_decide, axiom declarations or kernel bypasses"
