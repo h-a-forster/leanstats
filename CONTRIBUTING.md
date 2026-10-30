@@ -11,6 +11,7 @@ Install [elan](https://github.com/leanprover/elan) (the Lean toolchain manager).
 lake exe cache get   # prebuilt mathlib; do not build mathlib from source
 lake build --wfail
 sh scripts/check_no_sorry.sh
+LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest   # kernel replay
 ```
 
 The toolchain (`lean-toolchain`) and mathlib (`lakefile.toml`, `lake-manifest.json`) are
@@ -21,7 +22,7 @@ that is at least a week old.
 
 - No `sorry`, `admit`, new `axiom`, `native_decide` or kernel bypass in `LeanStats/` or
   `LeanStatsTest/`. `LeanStatsTest/Axioms.lean` audits every declaration in the namespace;
-  update its declaration count when you add one, and list a new main theorem by name.
+  add a new main theorem to the names listed after `#audit_leanstats_axioms`.
 - mathlib style: naming conventions, a module docstring with "Main statements", a docstring on
   every definition and main theorem, lines at most 100 characters. The build enables mathlib's
   standard linter set and CI treats warnings as errors.

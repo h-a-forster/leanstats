@@ -6,7 +6,7 @@ Date: 2026-10-30. Lean v4.35.0, mathlib `v4.35.0`
 ## 1. Result
 
 All three targets are proved with no `sorry`, `admit`, `native_decide` or new axiom.
-Revised after an external review (section 5).
+Revised after two external reviews (section 5).
 
 | Target | Main theorem | Status |
 |---|---|---|
@@ -17,7 +17,7 @@ Revised after an external review (section 5).
 | Clopper–Pearson endpoints solve `P_θ(X ≥ x) = α/2` (`1 ≤ x ≤ n`) and `P_θ(X ≤ x) = α/2` (`x < n`), `0 < α ≤ 2`; interval non-empty for `α ≤ 1` | `binomial_real_Ici_cpLower`, `binomial_real_Iic_cpUpper`, `cpLower_le_cpUpper` | proved |
 | Ville's inequality (stretch), `∃ k` and `sup_k` forms | `Supermartingale.mul_measure_exists_le`, `Supermartingale.measure_exists_le_le_div`, `Supermartingale.mul_measure_le_iSup` | proved |
 
-Size: 789 lines in `LeanStats/` (44 definitions and theorems), plus 203 lines of examples and
+Size: 790 lines in `LeanStats/` (44 definitions and theorems), plus 196 lines of examples and
 audit in `LeanStatsTest/`.
 
 A formal proof has no sampling error, so there are no intervals to report for the theorems
@@ -28,11 +28,11 @@ themselves. The quantities below are measurements of the checks.
 | Check | Command | Outcome |
 |---|---|---|
 | Kernel-checked build, warnings as errors, mathlib standard linters | `lake build --wfail` | passes (3129 jobs) |
-| Axioms of every declaration | `LeanStatsTest/Axioms.lean`: `#audit_leanstats_axioms` sweeps the `LeanStats` namespace; 11 main theorems are also listed by name | 47 declarations (44 source declarations and 3 equation lemmas), each within `[propext, Classical.choice, Quot.sound]`. Verified to fail on a planted `sorry` theorem in the namespace |
+| Axioms of every declaration | `LeanStatsTest/Axioms.lean`: `#audit_leanstats_axioms` sweeps the `LeanStats` namespace and requires 11 named main theorems to be among the audited declarations | 47 declarations (44 source declarations and 3 equation lemmas), each within `[propext, Classical.choice, Quot.sound]`. Verified to fail on a planted `sorry` theorem in the namespace, an unknown name and a listed name outside the namespace |
 | Audit catches a gap | replaced the proof of `bonferroni_fwer_le` by `sorry` and rebuilt | build failed: `depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]` |
-| Source scan | `sh scripts/check_no_sorry.sh` | passes. Verified to fail on a planted `sorry`, a planted `axiom`, and planted `set_option debug.skipKernelTC`, `implemented_by`, `extern` and `unsafe` (the previous scan passed the `skipKernelTC` plant) |
-| Kernel replay | `LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest` (also in CI) | passes, 169 s on this machine. Without module arguments leanchecker looks for a module named after the package (`Leanstats`) and fails, so CI passes them explicitly |
-| Definitions mean what they say | `LeanStatsTest/Examples.lean` | Holm rejects all of `(0.01, 0.02, 0.04)` at `α = 0.05` while Bonferroni misses `0.02`. Holm stops at `0.03 > 0.05/2` in `(0.01, 0.03, 0.04)` and does not reject `0.04`. Holm rejects neither tied value in `(0.02, 0.02, 0.5)` (a strict-count variant would reject both; checked separately). `cpUpper 1 0.05 0 = 0.975`. `cpLower 10 0.05 10 = 0.025^(1/10)`. `0.308 < cpUpper 10 0.05 0 < 0.309` and `0.115 < cpUpper 30 0.05 0 < 0.116`. Interior: `cpUpper 2 α 1 = √(1 - α/2)` from the definition, and `P(X ≥ 1) = 0.025` at `cpLower 2 0.05 1` |
+| Source scan | `sh scripts/check_no_sorry.sh` | passes. Verified to fail on a planted `sorry`, a planted `axiom`, and planted `set_option debug.skipKernelTC`, `implemented_by`, `extern` and `unsafe` (the previous scan passed the `skipKernelTC` plant). Also fails on each of `sorryAx`, `addDeclWithoutChecking`, `addDeclCore`, `modifyEnv`, `run_cmd`, `run_elab`, `run_meta` and on `debug.skipKernelTC` in `lakefile.toml`, all of which the previous scan passed. Commands that edit the environment are only caught reliably by the kernel replay |
+| Kernel replay | `LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest` (also in CI) | passes in 169–344 s on this machine (three runs: 169 s, 344 s, 330 s; load varies). Without module arguments leanchecker looks for a module named after the package (`Leanstats`) and fails, so CI passes them explicitly |
+| Definitions mean what they say | `LeanStatsTest/Examples.lean` | Holm rejects all of `(0.01, 0.02, 0.04)` at `α = 0.05` while Bonferroni misses `0.02`. Holm stops at `0.03 > 0.05/2` in `(0.01, 0.03, 0.04)` and does not reject `0.04`. Holm rejects neither tied value in `(0.02, 0.02, 0.5)` (a strict-count variant would reject both; checked separately). `cpUpper 1 0.05 0 = 0.975`. `cpLower 10 0.05 10 = 0.025^(1/10)`. `0.308 < cpUpper 10 0.05 0 < 0.309` and `0.115 < cpUpper 30 0.05 0 < 0.116`. Interior: `cpUpper 2 α 1 = √(1 - α/2)` from the definition, and `P(X ≥ 1) = 0.025` at `cpLower 2 0.05 1`. A uniform variable on `[0, 1]` satisfies `IsValidPValue` (the hypothesis is satisfiable). For `α = -2` and p-values `(-1, -1)` Holm and the sorted procedure disagree, so the `0 ≤ α` hypothesis of the equivalence is needed |
 
 The Clopper–Pearson closed forms agree with standard tables:
 `cpLower 10 0.05 10 = 0.025^(1/10) = 0.6915`, `cpUpper 10 0.05 0 = 0.3085` and
@@ -43,7 +43,7 @@ The Clopper–Pearson closed forms agree with standard tables:
 | Step | Wall time |
 |---|---|
 | `lake update` + `lake exe cache get` (toolchain, mathlib sources, 9031 cache files) | 28 min |
-| Clean build of leanstats (`rm -rf .lake/build; lake build --wfail`, mathlib cached) | 96 s |
+| Clean build of leanstats (`rm -rf .lake/build; lake build --wfail`, mathlib cached) | 96 s (one run) |
 | Incremental rebuild after editing every file | 2 min 10 s |
 
 Most of the per-file time is loading mathlib `.olean` files. For iteration, a persistent Lean
@@ -59,7 +59,9 @@ language server, which keeps imports loaded, re-checks a file in 1–3 s.
   the Beta quantile, needs monotonicity of the tail in `θ`, which is not proved here.
 - **CI has not run on GitHub.** The workflow runs on pull requests and manual dispatch only,
   and no run has happened yet. Every step it runs (source scan, `lake build --wfail`,
-  leanchecker with the same arguments) was run locally.
+  leanchecker with the same arguments) was run locally. The kernel replay is the only check
+  that catches a declaration added without kernel checking, so README and CONTRIBUTING list it
+  as a local step.
 - **Real-line distribution-function lemma not proved.** `measure_setOf_measure_Iic_le` is
   stated for countable linear orders, which covers the binomial case but not the general
   `P(F(X) ≤ t) ≤ t` for real random variables.
@@ -90,3 +92,17 @@ An external review found no correctness errors. Changes made in response:
 Not changed: the real-line distribution-function lemma (planned before upstreaming, docs/PR.md
 PR 1), and the third-party `axiom-audit` action input (the in-repo sweep covers the same check
 without running external code).
+
+A second review (mathematics and checks) found no correctness errors. Changes made in response:
+
+- The README and the `Holm.lean` docstring state the equivalence with the sorted procedure for
+  `α ≥ 0`, as the theorem does; an example shows it fails for `α < 0`.
+- New example: a uniform p-value satisfies `IsValidPValue`.
+- The source scan rejects more bypasses (section 2), and the README build step runs it with `sh`.
+- The axiom audit requires the main theorems by name instead of pinning the declaration count.
+- A broken table in docs/PR.md.
+
+Not changed: monotonicity of the binomial tails and uniqueness of the endpoint roots, the
+real-line distribution-function lemma and a `μ.real` corollary for measurable p-values (all
+planned before upstreaming, AGENTS.md and docs/PR.md), and running CI on GitHub (metered
+minutes).

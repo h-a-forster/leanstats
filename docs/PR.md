@@ -38,7 +38,6 @@ File: `Mathlib/Probability/Distributions/Binomial.lean`.
 | `binomial_Iic_compl` | `ProbabilityTheory.binomial_compl_Iic` |
 | `binomial_real_Iic` | `ProbabilityTheory.binomial_real_Iic` |
 | `binomial_real_Ici` | `ProbabilityTheory.binomial_real_Ici` |
-
 | `continuous_binomial_real_Ici`, `continuous_binomial_real_Iic` | `ProbabilityTheory.continuous_binomial_real_Ici`, `ProbabilityTheory.continuous_binomial_real_Iic` |
 
 Natural additions for the same PR: monotonicity of `θ ↦ Bin(n, θ).real (Ici x)` (stochastic

@@ -53,7 +53,9 @@ event of probability zero).
 `HolmRejects` describes Holm's procedure without a sorting permutation. Theorem
 `holmRejects_iff_stepDownRejects` proves that it agrees with the textbook procedure ("sort
 the p-values, reject while `p₍ⱼ₎ ≤ α / (m - j + 1)`, stop at the first failure") for every
-sorting order. The outcome therefore does not depend on how ties are broken.
+sorting order when `α ≥ 0`. The outcome therefore does not depend on how ties are broken. For
+`α < 0` the two can differ (a counterexample is in `LeanStatsTest/Examples.lean`), which does
+not affect the FWER bound.
 `exists_monotone_comp_equiv` shows that a sorting order always exists.
 
 ### Clopper–Pearson ([LeanStats/ClopperPearson.lean](LeanStats/ClopperPearson.lean))
@@ -121,8 +123,12 @@ You need [elan](https://github.com/leanprover/elan). Then:
 ```sh
 lake exe cache get   # downloads prebuilt mathlib (about 5 GB); never build mathlib from source
 lake build           # builds LeanStats and LeanStatsTest (examples and axiom audit)
-scripts/check_no_sorry.sh
+sh scripts/check_no_sorry.sh
+LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest   # kernel replay, minutes
 ```
+
+The kernel replay is the only check that catches a declaration added to the environment
+without kernel checking, so run it before relying on a change.
 
 The toolchain is pinned in `lean-toolchain` (Lean v4.35.0) and mathlib in `lakefile.toml`
 (tag `v4.35.0`, locked in `lake-manifest.json`).

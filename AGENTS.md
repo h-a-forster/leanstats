@@ -20,8 +20,9 @@ and no data.
   `LeanStats`. MIT header with `Authors: leanstats contributors` (the header linter is
   configured for MIT in `lakefile.toml`).
 - No `sorry`, `admit`, `native_decide`, `axiom` or kernel bypass (`scripts/check_no_sorry.sh`).
-  `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every declaration (update
-  its count when adding one); every new main theorem also gets a named `#print axioms` entry.
+  `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every declaration; add every
+  new main theorem to the names it lists. Run the leanchecker replay locally before pushing
+  (CI has not run yet).
 - Every new definition gets evidence that it is faithful: a characterisation theorem, a
   closed form or a worked example in `LeanStatsTest/Examples.lean`.
 - mathlib style and naming. `lake build --wfail` must pass with the standard linter set.
@@ -73,5 +74,7 @@ Next, in order of value:
 2. Real-line version of the distribution-function lemma (`P(F(X) ≤ t) ≤ t` for
    `ProbabilityTheory.cdf`), the natural mathlib generalisation (docs/PR.md, PR 1).
 3. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).
-4. Holm as closed testing with Bonferroni local tests; weighted Holm.
-5. Benjamini–Hochberg FDR control under independence/PRDS (a larger project).
+4. A corollary of `holm_fwer_le` for measurable (or `AEMeasurable`) p-values stated with
+   `μ.real`, the form mathlib reviewers will expect next to the outer-measure version.
+5. Holm as closed testing with Bonferroni local tests; weighted Holm.
+6. Benjamini–Hochberg FDR control under independence/PRDS (a larger project).
