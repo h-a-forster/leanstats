@@ -30,9 +30,8 @@ and no data.
 - CI (`.github/workflows/ci.yml`) runs on pull requests and manual dispatch only (metered
   private minutes): the source scan and its self-test, then `leanprover/lean-action` (pinned by SHA) with
   `--wfail` and a leanchecker replay (`LEAN_NUM_THREADS=1`, modules passed explicitly).
-- Scratch files go in `tmp/` (gitignored). Commits end with
-  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. No personal names, local paths or
-  machine details in committed files.
+- Scratch files go in `tmp/` (gitignored). No personal names, local paths or machine details in
+  committed files.
 
 ## Architecture map
 
@@ -53,26 +52,11 @@ and no data.
 Importing mathlib can cost minutes per `lean` process, and each process holds several GB of
 memory. Do not open many files at once. For fast iteration keep a single Lean language
 server running (`lake serve`) with one open document: re-checks then take seconds. Run
-`lake build` sequentially rather than in parallel shells.
+`lake build` sequentially rather than in parallel shells. The toolchain and `.lake` take about
+10 GB (REPORT.md section 3).
 
-## Status and next steps (2026-10-30)
+## Status
 
-Done (0.1.0, not yet tagged): Holm FWER (strong control, any real `α`; also as `μ.real`)
-under arbitrary dependence, Bonferroni corollary, sort-free definition proved equal to the
-sorted step-down procedure for `α ≥ 0`; Clopper–Pearson coverage `≥ 1 - α` for every `n` and
-`p ∈ [0, 1]`, tail formulas, closed forms for `x = 0` and `x = n`, strictly monotone tails and
-endpoints as the unique roots of the tail equations for interior `x`, non-empty interval for
-`α ≤ 1`; super-uniform distribution function on countable orders and on `ℝ` (`cdf`); Ville's
-inequality in `∃` and `sup` forms. `lake build --wfail`, the axiom sweep, the source scan and
-leanchecker pass locally. CI has not run yet on GitHub (no pull request opened, no dispatch);
-tag 0.1.0 after the first green run.
-
-Next, in order of value:
-
-1. Run CI once on GitHub (owner's call: metered minutes), then tag 0.1.0 (notes in
-   docs/release-notes-0.1.0.md).
-2. Upstream PR 1 and PR 2 of docs/PR.md (small, no design discussion needed).
-3. The Clopper–Pearson endpoints as quantiles of mathlib's Beta distribution (`betaPDF`): needs
-   `P_θ(X ≥ x) = ∫₀^θ betaPDF x (n - x + 1)`.
-4. Holm as closed testing with Bonferroni local tests; weighted Holm.
-5. Benjamini–Hochberg FDR control under independence/PRDS (a larger project).
+0.1.0 is not tagged, and CI has never run on GitHub. `lake build --wfail`, the axiom sweep, the
+source scan and leanchecker last passed locally on 2026-10-30. REPORT.md has the checks and
+limitations. Open work is in `backlog.md`.
