@@ -127,7 +127,7 @@ in `[0, ∞]`), whose event also contains paths that approach `ε` without reach
 You need [elan](https://github.com/leanprover/elan). Then:
 
 ```sh
-lake exe cache get   # downloads prebuilt mathlib (about 5 GB); never build mathlib from source
+lake exe cache get   # downloads prebuilt mathlib (about 7 GB); never build mathlib from source
 lake build           # builds LeanStats and LeanStatsTest (examples and axiom audit)
 sh scripts/check_no_sorry.sh
 LEAN_NUM_THREADS=1 lake env leanchecker LeanStats LeanStatsTest   # kernel replay, minutes
@@ -144,7 +144,9 @@ The toolchain is pinned in `lean-toolchain` (Lean v4.35.0) and mathlib in `lakef
 - [docs/DESIGN.md](docs/DESIGN.md): statements, proof strategies, prior art.
 - [docs/PR.md](docs/PR.md): draft plan for upstreaming to mathlib.
 - [REPORT.md](REPORT.md): what was checked, build measurements, limitations.
-- [AGENTS.md](AGENTS.md): conventions and next steps.
+- [docs/release-notes-0.1.0.md](docs/release-notes-0.1.0.md): notes for the first release.
+- [AGENTS.md](AGENTS.md): conventions.
+- [backlog.md](backlog.md): open work.
 
 ## Licence
 

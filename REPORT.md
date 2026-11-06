@@ -18,7 +18,7 @@ Revised after external reviews (section 5).
 | Clopper–Pearson endpoints solve `P_θ(X ≥ x) = α/2` (`1 ≤ x ≤ n`) and `P_θ(X ≤ x) = α/2` (`x < n`), `0 < α ≤ 2`; interval non-empty for `α ≤ 1` | `binomial_real_Ici_cpLower`, `binomial_real_Iic_cpUpper`, `cpLower_le_cpUpper` | proved |
 | Tails strictly monotone in `θ`, so each endpoint is the unique root of its tail equation | `strictMono_binomial_real_Ici`, `strictAnti_binomial_real_Iic`, `binomial_real_Ici_eq_iff`, `binomial_real_Iic_eq_iff` | proved |
 | Distribution function is super-uniform for any measure on `ℝ`: `P(F(X) ≤ t) ≤ t` | `measure_cdf_le`, `measure_setOf_measure_Iic_le_real`, `measure_setOf_measure_Ici_le_real` | proved |
-| Ville's inequality (stretch), `∃ k` and `sup_k` forms | `Supermartingale.mul_measure_exists_le`, `Supermartingale.measure_exists_le_le_div`, `Supermartingale.mul_measure_le_iSup` | proved |
+| Ville's inequality, `∃ k` and `sup_k` forms | `Supermartingale.mul_measure_exists_le`, `Supermartingale.measure_exists_le_le_div`, `Supermartingale.mul_measure_le_iSup` | proved |
 
 Size: 946 lines in `LeanStats/` (54 definitions and theorems), plus 218 lines of examples and
 audit in `LeanStatsTest/`.
@@ -49,6 +49,8 @@ The Clopper–Pearson closed forms agree with standard tables:
 | Clean build of leanstats (`rm -rf .lake/build; lake build --wfail`, mathlib cached) | 96 s (one run) |
 | Incremental rebuild after editing every file | 2 min 10 s |
 
+Disk after setup: 6.8 GB in `.lake`, 3.2 GB in the elan toolchain directory.
+
 Most of the per-file time is loading mathlib `.olean` files. For iteration, a persistent Lean
 language server, which keeps imports loaded, re-checks a file in 1–3 s.
 
@@ -73,8 +75,11 @@ language server, which keeps imports loaded, re-checks a file in 1–3 s.
   There is no continuous-time version and no e-process generalisation.
 - **Not yet in mathlib.** The code follows mathlib style and builds with mathlib's linters, but
   it has not been reviewed by mathlib maintainers. docs/PR.md lists the expected renames.
-- **Prior art search was limited** to mathlib's source and a web search. No novelty claim is
-  made for other proof assistants.
+- **Not new outside mathlib.** Holm, a one-sided Clopper–Pearson bound and Ville each exist in
+  other Lean 4 projects (docs/DESIGN.md section 3). No novelty claim is made, in Lean or in
+  other proof assistants, which were not searched exhaustively.
+- **The interval can be empty for `α > 1`.** `cpLower_le_cpUpper` covers `α ≤ 1`; see
+  docs/DESIGN.md section 2. Coverage is trivial at those levels.
 
 ## 5. Review follow-up (2026-10-30)
 
@@ -120,3 +125,20 @@ A third pass handled the review findings that the earlier follow-ups had not rea
   edge cases; machine-specific wording; 0.1.0 marked as not yet tagged; private reporting.
 
 Still not done: running CI on GitHub and tagging 0.1.0 (both need the owner).
+
+## 6. Release audit (2026-11-06)
+
+Nothing was rebuilt: the Lean toolchain and `.lake` are not on the audit machine, and CI was not
+run. The only Lean change since the checks in section 2 is a sentence in the module docstring of
+`LeanStats/ClopperPearson.lean`. The checks that did run:
+
+- Source scan and its self-test pass.
+- The statements in docs/release-notes-0.1.0.md match the sources, and every name in the
+  `leanstats` column of docs/PR.md is declared. `LeanStats/` has 946 lines and 54 declarations,
+  none private; `LeanStatsTest/` has 218 lines.
+- The action SHAs in `ci.yml` match their tags, and the manifest's mathlib commit matches tag
+  `v4.35.0`. lean-action v1.6.2 passes `leanchecker-args` to `lake env leanchecker`.
+
+Corrected: docs/DESIGN.md said the interval is empty only for `α > 2`, and that no formalisation
+was found outside mathlib. Neither holds (section 4). The first was checked numerically from the
+binomial tails: `n = 2`, `x = 1` gives endpoints `0.50503` and `0.49497` at `α = 1.51`.

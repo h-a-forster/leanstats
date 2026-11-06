@@ -30,10 +30,10 @@ smallest root of `P_θ(X ≥ x) = α / 2`: the tail equals `α / 2` there and is
 smaller `θ`. The same holds for the upper bound and `P_θ(X ≤ x)` when `x < n`. The upper tail
 is strictly increasing in `θ` (its derivative is `n · B_{n-1,x-1}(θ)`, a Bernstein polynomial)
 and the lower tail strictly decreasing, so each endpoint is the unique root of its equation,
-which is the textbook definition (equivalently, the `α / 2` quantile of `Beta(x, n - x + 1)`;
-the identification with the Beta distribution is not formalised). The coverage proof does not
-depend on how the endpoints are computed, only on the fact that they bound the accepted
-parameters.
+which is the textbook definition (equivalently, the lower bound is the `α / 2` quantile of
+`Beta(x, n - x + 1)` and the upper the `1 - α / 2` quantile of `Beta(x + 1, n - x)`; this is
+not formalised). The coverage proof does not depend on how the endpoints are computed, only on
+the fact that they bound the accepted parameters.
 
 The bounds take values in `unitInterval`, which is a complete lattice, so the infimum and
 supremum always exist. The interval is the closed interval `Set.Icc (cpLower n α x)

@@ -91,7 +91,7 @@ exact. On `ℝ` (`measure_setOf_measure_Iic_le_real`, and `measure_cdf_le` for `
 `A` is covered by countably many of its own `Iic x`: those at rational points of `A` and at its
 maximum, if it has one.
 
-### 1.4 Ville (S3, stretch)
+### 1.4 Ville (S3)
 
 For a non-negative supermartingale `M` with respect to a filtration on `ℕ`, a finite measure
 `μ` and `ε : ℝ≥0`:
@@ -123,8 +123,13 @@ by continuity from below.
   proof to a dozen lines and moves the bookkeeping into a separate equivalence theorem.
 - **Endpoints in `unitInterval`.** With `ℝ`-valued `sInf`/`sSup` the empty-set and
   unboundedness conventions (`sInf ∅ = 0`) would need side conditions; `unitInterval` is a
-  complete linear order, so `sInf_le`/`le_sSup` apply directly. Only `α > 2` empties both
-  accepted sets and gives the empty interval. For `x > n` (an event of probability zero) and
+  complete linear order, so `sInf_le`/`le_sSup` apply directly. `α > 2` empties both accepted
+  sets, which gives the empty interval. It can also be empty for `1 < α ≤ 2`, because the two
+  roots cross at interior `x`: for `n = 2`, `x = 1` the endpoints are `1 - √(1 - α/2)` and
+  `√(1 - α/2)`, so the interval is empty for `α > 3/2`. `cpLower_le_cpUpper` rules this out
+  for `α ≤ 1`, and that bound cannot be raised for all `n`: as `n` grows the threshold at
+  `x = n/2` tends to 1. Coverage is unaffected, since it is trivial for `α ≥ 1`.
+  For `x > n` (an event of probability zero) and
   `α > 0` the lower set is empty, so `cpLower = 1` and the interval is `{1}` when `α ≤ 2`
   (`[0, 1]` when `α ≤ 0`).
 - **Level convention.** Each tail gets `α/2` (the equal-tailed Clopper–Pearson interval).
@@ -147,15 +152,28 @@ by continuity from below.
   `PMF.binomial`, optional stopping and Doob's maximal inequality `maximal_ineq`
   (Mathlib/Probability/Martingale/OptionalStopping.lean), hitting times
   (Mathlib/Probability/Process/HittingTime.lean). https://github.com/leanprover-community/mathlib4
-- Formal statistics elsewhere: no formalisation of Holm, Clopper–Pearson or Ville was found in
-  mathlib v4.35.0 (source search) or by a web search (October 2026). The Isabelle Archive of
-  Formal Proofs (https://www.isa-afp.org) and Coq libraries were not searched exhaustively,
-  so no novelty claim is made beyond mathlib.
+- Formal statistics elsewhere: mathlib has none of the three (source search of v4.35.0, and
+  of `master` on 2026-11-06). All three exist in other Lean 4 projects, found by a GitHub code
+  search on 2026-11-06 and read only as far as their statements:
+  - Holm, Bonferroni, closed testing and Benjamini–Hochberg: `MultipleTesting/` in
+    https://github.com/facebookresearch/atlas-lean (`Fin m`-indexed, with a rejection set
+    defined through a step-down count).
+  - One-sided Clopper–Pearson lower bound with coverage, as a certificate for randomised
+    smoothing: `Smoothing/CP.lean` in https://github.com/brettkoonce/lean4-mlir.
+  - Ville: https://github.com/LeanMachineLearning/LMLExplore and
+    https://github.com/Jiyuan-Tan/CausalSmith. Three mathlib pull requests for Ville were
+    closed unmerged (#36641, #37121, #40085).
+
+  So no novelty claim is made. leanstats keeps the three together in one small library, with
+  Holm over any finite index type, its equivalence with the sorted procedure for every
+  tie-breaking order, and a two-sided interval whose endpoints are proved to be the unique
+  roots. The Isabelle Archive of Formal Proofs (https://www.isa-afp.org) and Coq libraries were
+  not searched exhaustively.
 
 ## 4. Out of scope (v0.1)
 
-- Monotonicity of binomial tails in `θ`, uniqueness of the endpoint roots and the
-  Beta-quantile form, and exactness of the closed interval at the endpoints.
+- The Beta-quantile form of the Clopper–Pearson endpoints, and exactness of the closed
+  interval at the endpoints.
 - Holm's procedure via closed testing, weighted Holm, Hochberg/Hommel (which need dependence
   assumptions), and FDR procedures (Benjamini–Hochberg).
 - Continuous-time Ville and e-process generalisations.

@@ -128,7 +128,8 @@ theorem cpLower_le_cpUpper (n : ℕ) {α : ℝ} (hα : α ≤ 1) (x : ℕ) :
     cpLower n α x ≤ cpUpper n α x
 ```
 
-So for interior `x` each endpoint is the unique root of its tail equation, which rests on
+For `α > 1` the interval can be empty (`n = 2`, `x = 1`, `α > 3/2`); coverage is trivial
+there. For interior `x` each endpoint is the unique root of its tail equation, which rests on
 `strictMono_binomial_real_Ici` and `strictAnti_binomial_real_Iic` (the tails are strictly
 monotone in `θ`); `binomial_real_Ici_cpLower` and `binomial_real_Iic_cpUpper` state the root
 property directly. The examples pin concrete values, for instance `cpUpper 1 0.05 0 =
@@ -183,5 +184,18 @@ supremum form also counts paths that approach `ε` without reaching it.
 - CI has not run on GitHub (it runs on pull requests and manual dispatch only); every step
   it runs was run locally. The tag waits for the first green run.
 - Nothing is in mathlib; [docs/PR.md](PR.md) plans the pull requests and renames.
+
+## Corrections from the audit of 2026-11-06
+
+Nothing was rebuilt and the only Lean change is one sentence in the `ClopperPearson` module
+docstring (which Beta quantile each endpoint is), so these are not code changes.
+[REPORT.md](../REPORT.md) section 6 lists what was checked.
+
+- docs/DESIGN.md: the interval can be empty for `1 < α ≤ 2`, not only for `α > 2`.
+- docs/DESIGN.md and REPORT.md: Holm, a one-sided Clopper–Pearson bound and Ville exist in
+  other Lean 4 projects, so the claim that a web search found none is withdrawn.
+- docs/DESIGN.md: monotone tails and unique roots are no longer listed as out of scope.
+- docs/PR.md: mathlib's rules on AI-written code and the closed Ville pull requests.
+- README.md: setup takes about 7 GB for mathlib, not 5 GB.
 
 The full list of additions is in [CHANGELOG.md](../CHANGELOG.md).

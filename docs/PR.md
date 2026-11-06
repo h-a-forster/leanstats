@@ -4,6 +4,19 @@ This is a plan for splitting leanstats into mathlib pull requests. Mathlib prefe
 that each add one coherent piece with its API, so the order below goes from general measure
 theory to statistics. Nothing here has been submitted yet.
 
+## Before opening anything
+
+- **AI-written code.** These proofs were written with an LLM. Mathlib's
+  [rules](https://leanprover-community.github.io/contribute/#use-of-ai) require explaining the
+  AI use in the PR description, the `LLM-generated` label, an author who understands every
+  line and can defend it unaided, and comments in the author's own words. Reviewers may close
+  low-quality LLM pull requests without comment, especially without prior discussion on Zulip,
+  and repeat offenders can be banned. Discuss on Zulip first and expect to rewrite by hand.
+- **Ville has been tried three times.** #36641, #37121 and #40085 were closed unmerged, all
+  labelled `LLM-generated`. On #36641 a reviewer objected that it had no statement about a
+  supremum, which `Supermartingale.mul_measure_le_iSup` provides. Read those threads first.
+- **Overlap.** See docs/DESIGN.md section 3 for other Lean formalisations.
+
 ## Changes needed for any PR
 
 - **Module system.** Mathlib files start with `module`, use `public import`, and wrap the
