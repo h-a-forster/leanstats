@@ -6,7 +6,6 @@
 
 - First green CI run: open a pull request from `polish-2026-10-30` to `main` (metered minutes; the workflow has never run on GitHub).
 - Merge the pull request and tag v0.1.0 once CI is green.
-- Make the repository public after the first green run, then enable private vulnerability reporting (SECURITY.md relies on it).
 - Decide whether to rewrite history before going public to drop the `Co-Authored-By` trailers on 21 commits (no tags exist yet, so this is the cheapest moment).
 - Decide whether to send mathlib PRs under a real name, given mathlib's rules on AI-written code (docs/PR.md).
 
