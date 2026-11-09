@@ -5,3 +5,4 @@ data/
 cache/
 .env
 .env.*
+backlog.md

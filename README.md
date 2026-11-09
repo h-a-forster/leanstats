@@ -146,7 +146,6 @@ The toolchain is pinned in `lean-toolchain` (Lean v4.35.0) and mathlib in `lakef
 - [REPORT.md](REPORT.md): what was checked, build measurements, limitations.
 - [docs/release-notes-0.1.0.md](docs/release-notes-0.1.0.md): notes for the first release.
 - [AGENTS.md](AGENTS.md): conventions.
-- [backlog.md](backlog.md): open work.
 
 ## Licence
 
