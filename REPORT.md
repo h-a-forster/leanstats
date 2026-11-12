@@ -124,7 +124,8 @@ A third pass handled the review findings that the earlier follow-ups had not rea
 - Documentation: `α ≥ 0` for the step-down equivalence in this report and docs/PR.md; DESIGN
   edge cases; machine-specific wording; 0.1.0 marked as not yet tagged; private reporting.
 
-Still not done: running CI on GitHub and tagging 0.1.0 (both need the owner).
+Both have since been done: CI first ran green on GitHub on 2026-11-06, and `v0.1.0` was tagged
+on 2026-11-07.
 
 ## 6. Release audit (2026-11-06)
 

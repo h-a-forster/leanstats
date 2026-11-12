@@ -21,14 +21,13 @@ and no data.
   configured for MIT in `lakefile.toml`).
 - No `sorry`, `admit`, `native_decide`, `axiom` or kernel bypass (`scripts/check_no_sorry.sh`).
   `#audit_leanstats_axioms` in `LeanStatsTest/Axioms.lean` audits every public declaration; add every
-  new main theorem to the names it lists. Run the leanchecker replay locally before pushing
-  (CI has not run yet).
+  new main theorem to the names it lists. Run the leanchecker replay locally before pushing.
 - Every new definition gets evidence that it is faithful: a characterisation theorem, a
   closed form or a worked example in `LeanStatsTest/Examples.lean`.
 - mathlib style and naming. `lake build --wfail` must pass with the standard linter set.
   Search mathlib (`exact?`, Loogle, the docs) before writing a helper lemma.
-- CI (`.github/workflows/ci.yml`) runs on pull requests and manual dispatch only (metered
-  private minutes): the source scan and its self-test, then `leanprover/lean-action` (pinned by SHA) with
+- CI (`.github/workflows/ci.yml`) runs on pushes to `main`, pull requests and manual
+  dispatch: the source scan and its self-test, then `leanprover/lean-action` (pinned by SHA) with
   `--wfail` and a leanchecker replay (`LEAN_NUM_THREADS=1`, modules passed explicitly).
 - Scratch files go in `tmp/` (gitignored). No personal names, local paths or machine details in
   committed files.

@@ -1,7 +1,7 @@
 # leanstats 0.1.0
 
-First release (2026-10-30). Not tagged yet: the tag follows the first green CI run on
-GitHub, which needs the owner (metered minutes). Lean v4.35.0, mathlib tag `v4.35.0`
+First release (2026-10-30), tagged `v0.1.0` on 2026-11-07 after the first green CI run on
+GitHub. Lean v4.35.0, mathlib tag `v4.35.0`
 (commit `56a005855ea17e0b0958f73ec801ae140b0a1679`, locked in `lake-manifest.json`).
 
 Machine-checked proofs of Holm's family-wise error control (with Bonferroni and the
@@ -181,8 +181,7 @@ supremum form also counts paths that approach `ε` without reaching it.
 
 ## Not done yet
 
-- CI has not run on GitHub (it runs on pull requests and manual dispatch only); every step
-  it runs was run locally. The tag waits for the first green run.
+- CI first ran on GitHub on 2026-11-06 (manual dispatch, green); the tag followed.
 - Nothing is in mathlib; [docs/PR.md](PR.md) plans the pull requests and renames.
 
 ## Corrections from the audit of 2026-11-06

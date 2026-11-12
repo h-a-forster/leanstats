@@ -7,8 +7,7 @@ proved but is not.
 ## Reporting
 
 Report problems privately through the repository's **Security** tab ("Report a
-vulnerability") once the repository is public; GitHub offers private reporting only for public
-repositories. While it is private, open an issue (only collaborators can see it). Include the commit, the Lean and mathlib versions, and a minimal file that
+vulnerability"). Include the commit, the Lean and mathlib versions, and a minimal file that
 shows the problem.
 
 ## In scope
