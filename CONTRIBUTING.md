@@ -34,7 +34,7 @@ that is at least a week old.
 
 ## Pull requests
 
-CI runs on pull requests (and manual dispatch): the source scan and its self-test
+CI runs on pushes to `main`, pull requests and manual dispatch: the source scan and its self-test
 (`sh scripts/test_check_no_sorry.sh`; extend it when you extend the scan), then `lake build --wfail`
 through `leanprover/lean-action`, which also builds the examples and the axiom audit, then a
 kernel replay with leanchecker.

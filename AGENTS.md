@@ -56,6 +56,6 @@ server running (`lake serve`) with one open document: re-checks then take second
 
 ## Status
 
-0.1.0 is not tagged, and CI has never run on GitHub. `lake build --wfail`, the axiom sweep, the
-source scan and leanchecker last passed locally on 2026-10-30. REPORT.md has the checks and
+`v0.1.0` is tagged (2026-11-07) and CI has run green on GitHub since 2026-11-06. `lake build
+--wfail`, the axiom sweep, the source scan and leanchecker last passed locally on 2026-10-30. REPORT.md has the checks and
 limitations. Open work is in `backlog.md`.

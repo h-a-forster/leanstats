@@ -62,11 +62,10 @@ language server, which keeps imports loaded, re-checks a file in 1–3 s.
   `x = n`, and, for interior `x`, the proof that each endpoint is the unique root of its tail
   equation (the textbook definition). The identification of that root with a quantile of the
   Beta distribution is not proved.
-- **CI has not run on GitHub.** The workflow runs on pull requests and manual dispatch only,
-  and no run has happened yet. Every step it runs (source scan, `lake build --wfail`,
-  leanchecker with the same arguments) was run locally. The kernel replay is the only check
-  that catches a declaration added without kernel checking, so README and CONTRIBUTING list it
-  as a local step.
+- **The kernel replay is a separate step.** It is the only check that catches a declaration
+  added without kernel checking, and `lake build` does not run it, so README and CONTRIBUTING
+  list it as a local step. CI runs it after the source scan and `lake build --wfail`, on pushes
+  to `main`, pull requests and manual dispatch (first green run on 2026-11-06).
 - **Holm is stated for a fixed set of true nulls `I₀`.** This is the standard frequentist
   statement (it holds for every `I₀`). Data-dependent or random hypotheses are not modelled.
 - **No closed-testing proof.** Holm's procedure is proved directly, not as a closed testing
